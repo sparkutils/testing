@@ -5,10 +5,12 @@ import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
+import java.io.{FileWriter, PrintWriter}
+
 /**
  * Functionality that only applies to Spark Classic
  */
-trait ClassicUtils {
+trait ClassicUtils extends SparkConfBuilder {
 
   val classicHostMode = {
     val tmp = System.getenv("SPARKUTILS_SPARK_HOSTS")
@@ -41,6 +43,29 @@ trait ClassicUtils {
     // sparkSession.conf.set("spark.sql.legacy.castComplexTypesToString.enabled", true)
     sparkSession.sparkContext.setLogLevel(loggingLevel) // set to debug to get actual code lines etc.
     sparkSession
+  }
+
+  /**
+   * Builds a spark-defaults conf for use on the spawned connect
+   */
+  def buildSparkConf(): Unit = {
+    val f = new PrintWriter(new FileWriter("./conf/spark-defaults.conf"))
+    try {
+      if (System.getProperty("os.name").startsWith("Windows")) {
+        f.println(s"spark.hadoop.fs.file.impl ${classOf[BareLocalFileSystem].getName}")
+      }
+      if (excludeFilters) {
+        f.println("spark.sql.optimizer.excludedRules org.apache.spark.sql.catalyst.optimizer.InferFiltersFromGenerate")
+      }
+
+      f.println("spark.sql.optimizer.nestedSchemaPruning.enabled true")
+      if (lambdaSubQueryMode ne null) {
+        f.println(s"spark.sql.analyzer.allowSubqueryExpressionsInLambdasOrHigherOrderFunctions $lambdaSubQueryMode")
+      }
+
+    } finally {
+      f.close()
+    }
   }
 
   val excludeFilters = {

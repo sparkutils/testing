@@ -362,6 +362,22 @@
 
                 <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
             </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-connect-client-jvm_${scalaCompatVersion}</artifactId>
+                    <version>${sparkVersion}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-connect-client-jvm_${scalaCompatVersion}</artifactId>
+                    <version>${sparkVersion}</version>
+                    <classifier>tests</classifier>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
         </profile>
         <profile>
             <id>14.0.dbr</id>
@@ -571,6 +587,15 @@
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scalaVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
 

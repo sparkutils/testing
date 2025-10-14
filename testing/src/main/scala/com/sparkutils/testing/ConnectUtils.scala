@@ -2,20 +2,22 @@ package com.sparkutils.testing
 
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
-trait ConnectUtils {
+import scala.util.Try
+
+trait ConnectUtils { this: SparkConfBuilder =>
 
   val disableConnectTesting = {
     val tmp = System.getenv("SPARKUTILS_DISABLE_CONNECT_TESTS")
     if (tmp eq null)
-      null
+      false
     else
-      tmp
+      Try{tmp.toBoolean}.getOrElse(false)
   }
 
   lazy val connectSparkSession: Option[SparkSession] = {
-    if (disableConnectTesting ne null && disableConnectTesting.toBoolean)
+    if (!disableConnectTesting) {
       SparkTestUtils.localConnectServerForTesting
-    else
+    } else
       None
   }
   lazy val connectSqlContext: Option[SQLContext] = connectSparkSession.map(_.sqlContext)
