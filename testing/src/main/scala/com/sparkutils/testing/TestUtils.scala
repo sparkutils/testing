@@ -11,7 +11,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.reflect.io.Directory
 
-trait TestUtils extends ClassicUtils with ConnectUtils with Serializable {
+trait TestUtils extends SessionStrategy with Serializable {
 
   // always set
   Testing.setTesting()
@@ -22,7 +22,7 @@ trait TestUtils extends ClassicUtils with ConnectUtils with Serializable {
    */
   def sqlContext: SQLContext = sparkSession.sqlContext // mode specific classicSparkSessionF.sqlContext
 
-  protected val inConnect = new AtomicBoolean(false)
+  protected[testing] val inConnect = new AtomicBoolean(false)
 
   /**
    * returns the current sparkSession, when connect is enabled AND the active session it returns a connect SparkSession, otherwise classic
@@ -30,9 +30,9 @@ trait TestUtils extends ClassicUtils with ConnectUtils with Serializable {
    */
   def sparkSession: SparkSession = {
     if (inConnect.get()) {
-      connectSparkSession.getOrElse(classicSparkSession)
+      sessions.connect.map(_.sparkSession).orElse(sessions.classic).getOrElse(throw new IllegalStateException("At least one SparkSession must be enabled"))
     } else
-      classicSparkSession
+      sessions.classic.getOrElse(throw new IllegalStateException("At least one SparkSession must be enabled"))
   }
 
   /**
@@ -154,6 +154,25 @@ trait TestUtils extends ClassicUtils with ConnectUtils with Serializable {
     }
   }
 
+  def testPlan(logicalPlanRule: org.apache.spark.sql.catalyst.rules.Rule[LogicalPlan], secondRunWithoutPlan: Boolean = true, disable: Int => Boolean = _ => false)(thunk: => Unit): Unit = {
+    val cur = SparkSession.getActiveSession.get.experimental.extraOptimizations
+    try{
+      if (!disable(sparkVersionNumericMajor)) {
+        SparkSession.getActiveSession.get.experimental.extraOptimizations = SparkSession.getActiveSession.get.experimental.extraOptimizations :+ logicalPlanRule
+      }
+      thunk
+    } finally {
+      SparkSession.getActiveSession.get.experimental.extraOptimizations = cur
+      if (secondRunWithoutPlan) {
+        thunk // re-run it
+      }
+    }
+  }
+
+}
+
+object TestUtils {
+
   /**
    * Checks for an exception, then it's cause(s) for f being true
    * @param t
@@ -197,21 +216,6 @@ trait TestUtils extends ClassicUtils with ConnectUtils with Serializable {
 
   def debug(thunk: => Unit): Unit =
     TestUtilsEnvironment.debug(thunk)
-
-  def testPlan(logicalPlanRule: org.apache.spark.sql.catalyst.rules.Rule[LogicalPlan], secondRunWithoutPlan: Boolean = true, disable: Int => Boolean = _ => false)(thunk: => Unit): Unit = {
-    val cur = SparkSession.getActiveSession.get.experimental.extraOptimizations
-    try{
-      if (!disable(sparkVersionNumericMajor)) {
-        SparkSession.getActiveSession.get.experimental.extraOptimizations = SparkSession.getActiveSession.get.experimental.extraOptimizations :+ logicalPlanRule
-      }
-      thunk
-    } finally {
-      SparkSession.getActiveSession.get.experimental.extraOptimizations = cur
-      if (secondRunWithoutPlan) {
-        thunk // re-run it
-      }
-    }
-  }
 
 }
 
@@ -278,7 +282,7 @@ object TestUtilsEnvironment {
     }
 
   def setupDefaultsViaCurrentSession(): Unit =
-    SparkSession.getActiveSession.foreach(setupDefaults(_))
+    SparkSession.getActiveSession.foreach(setupDefaults)
 
   def debug(thunk: => Unit): Unit =
     if (shouldDebugLog) {

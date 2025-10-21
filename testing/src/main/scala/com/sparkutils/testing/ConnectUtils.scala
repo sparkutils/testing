@@ -1,25 +1,21 @@
 package com.sparkutils.testing
 
-import org.apache.spark.sql.{SQLContext, SparkSession}
+import com.sparkutils.testing.Utils.booleanEnv
+import org.apache.spark.sql.SparkSession
 
-import scala.util.Try
+trait ConnectUtils extends SparkConnectConfig with SparkClassicConfig {
 
-trait ConnectUtils { this: SparkConfBuilder =>
+  val disableConnectTesting = booleanEnv("SPARKUTILS_DISABLE_CONNECT_TESTS")
 
-  val disableConnectTesting = {
-    val tmp = System.getenv("SPARKUTILS_DISABLE_CONNECT_TESTS")
-    if (tmp eq null)
-      false
-    else
-      Try{tmp.toBoolean}.getOrElse(false)
-  }
-
-  lazy val connectSparkSession: Option[SparkSession] = {
+  def connectSparkSession: Option[ConnectSession] =
     if (!disableConnectTesting) {
-      SparkTestUtils.localConnectServerForTesting
+      SparkTestUtils.localConnectServerForTesting(sparkClassicConfig() ++ sparkConnectConfig())
     } else
       None
-  }
-  lazy val connectSqlContext: Option[SQLContext] = connectSparkSession.map(_.sqlContext)
+}
 
+trait ConnectSession {
+  def sparkSession: SparkSession
+
+  def stopServer(): Unit
 }

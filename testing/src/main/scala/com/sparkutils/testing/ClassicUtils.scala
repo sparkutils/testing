@@ -1,16 +1,18 @@
 package com.sparkutils.testing
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
+import com.sparkutils.testing.Utils.booleanEnv
 import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.apache.spark.sql.SparkSession
 
-import java.io.{FileWriter, PrintWriter}
 
 /**
  * Functionality that only applies to Spark Classic
  */
-trait ClassicUtils extends SparkConfBuilder {
+trait ClassicUtils extends SparkClassicConfig {
+
+  val disableClassicTesting = booleanEnv("SPARKUTILS_DISABLE_CLASSIC_TESTS")
 
   val classicHostMode = {
     val tmp = System.getenv("SPARKUTILS_SPARK_HOSTS")
@@ -29,44 +31,47 @@ trait ClassicUtils extends SparkConfBuilder {
 
   def loggingLevel: String = "ERROR"
 
-  def classicSparkSessionF: SparkSession = {
-    val sparkSession = registerFS(SparkSession.builder()).config("spark.master", s"local[$classicHostMode]").config("spark.ui.enabled", false).getOrCreate()
-    if (excludeFilters) {
-      sparkSession.conf.set("spark.sql.optimizer.excludedRules", "org.apache.spark.sql.catalyst.optimizer.InferFiltersFromGenerate")
-    }
-
-    sparkSession.conf.set("spark.sql.optimizer.nestedSchemaPruning.enabled", true)
-    if (lambdaSubQueryMode ne null) {
-      sparkSession.conf.set("spark.sql.analyzer.allowSubqueryExpressionsInLambdasOrHigherOrderFunctions", lambdaSubQueryMode)
-    }
-    // only a visual change
-    // sparkSession.conf.set("spark.sql.legacy.castComplexTypesToString.enabled", true)
-    sparkSession.sparkContext.setLogLevel(loggingLevel) // set to debug to get actual code lines etc.
-    sparkSession
-  }
+  def classicSparkSession: Option[SparkSession] =
+    if (disableClassicTesting)
+      None
+    else
+      Some{
+        val configRaw = sparkClassicConfig()
+        val cmap = configRaw.toMap
+        val sparkSessionConf = SparkSession.builder()
+        val sparkSession =
+          cmap.foldLeft(sparkSessionConf){
+            (conf, pair) =>
+              conf.config(pair._1, pair._2)
+          }.getOrCreate()
+        // only a visual change
+        // sparkSession.conf.set("spark.sql.legacy.castComplexTypesToString.enabled", true)
+        sparkSession.sparkContext.setLogLevel(loggingLevel) // set to debug to get actual code lines etc.
+        sparkSession
+      }
 
   /**
-   * Builds a spark-defaults conf for use on the spawned connect
+   * Builds a spark-defaults conf for use on the spawned/forked connect.
+   * Override and call to add / override extra config items
    */
-  def buildSparkConf(): Unit = {
-    val f = new PrintWriter(new FileWriter("./conf/spark-defaults.conf"))
-    try {
-      if (System.getProperty("os.name").startsWith("Windows")) {
-        f.println(s"spark.hadoop.fs.file.impl ${classOf[BareLocalFileSystem].getName}")
-      }
-      if (excludeFilters) {
-        f.println("spark.sql.optimizer.excludedRules org.apache.spark.sql.catalyst.optimizer.InferFiltersFromGenerate")
-      }
-
-      f.println("spark.sql.optimizer.nestedSchemaPruning.enabled true")
-      if (lambdaSubQueryMode ne null) {
-        f.println(s"spark.sql.analyzer.allowSubqueryExpressionsInLambdasOrHigherOrderFunctions $lambdaSubQueryMode")
-      }
-
-    } finally {
-      f.close()
-    }
-  }
+  def sparkClassicConfig(): Map[String, String] =
+    Set(
+      Some("spark.ui.enabled", "false"),
+      Some(("spark.master", s"local[$classicHostMode]")),
+      if (System.getProperty("os.name").startsWith("Windows"))
+        Some(("spark.hadoop.fs.file.impl", classOf[BareLocalFileSystem].getName))
+      else
+        None,
+      if (excludeFilters)
+        Some(("spark.sql.optimizer.excludedRules","org.apache.spark.sql.catalyst.optimizer.InferFiltersFromGenerate"))
+      else
+        None,
+      Some(("spark.sql.optimizer.nestedSchemaPruning.enabled","true")),
+      if (lambdaSubQueryMode ne null)
+        Some(("spark.sql.analyzer.allowSubqueryExpressionsInLambdasOrHigherOrderFunctions",lambdaSubQueryMode))
+      else
+        None
+    ).flatten.toMap
 
   val excludeFilters = {
     val tmp = System.getProperty("excludeFilters")
@@ -75,20 +80,6 @@ trait ClassicUtils extends SparkConfBuilder {
     else
       tmp.toBoolean
   }
-
-  /**
-   * Allows bare naked to be used instead of winutils for testing / dev
-   */
-  def registerFS(sparkSessionBuilder: SparkSession.Builder): SparkSession.Builder =
-    if (System.getProperty("os.name").startsWith("Windows"))
-      sparkSessionBuilder.config("spark.hadoop.fs.file.impl",classOf[BareLocalFileSystem].getName)
-    else
-      sparkSessionBuilder
-
-  lazy val classicSparkSession: SparkSession = classicSparkSessionF
-  lazy val classicSqlContext: SQLContext = classicSparkSessionF.sqlContext
-
-
 
   // if this blows then debug on CodeGenerator 1294, 1299 and grab code.body
   def forceCodeGen[T](f: => T): T = {

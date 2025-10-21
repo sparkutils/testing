@@ -6,3 +6,13 @@ import org.scalatest.Tag
  * Annotate your scalatest tests with NoSparkConnect to disable running on Spark Connect
  */
 object NoSparkConnect extends Tag("com.sparkutils.testing.NoSparkConnect")
+
+/**
+ * Helper trait for possible JUnit jars
+ */
+trait ShouldRunWithoutSparkConnect {
+
+  type TestType
+
+  def disableSparkConnect(t: TestType): Boolean
+}

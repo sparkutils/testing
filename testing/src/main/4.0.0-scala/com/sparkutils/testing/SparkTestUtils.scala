@@ -1,8 +1,7 @@
 package com.sparkutils.testing
 
 import java.util.concurrent.atomic.AtomicReference
-
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkConnectServerUtils, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.execution.{FileSourceScanExec, LocalTableScanExec, SparkPlan}
@@ -28,15 +27,10 @@ object SparkTestUtils {
 
   def setPath(newPath: String) = {
     tpath.set(newPath)
-    // when this is called set the docs path as well as an offset
-    tdocpath.set(newPath + "/docs")
   }
 
   def path(suffix: String) = s"${tpath.get}/$suffix"
 
-  protected var tdocpath = new AtomicReference[String]("./docs/advanced")
-  def docDir = tpath.get
-  def docpath(suffix: String) = s"${tdocpath.get}/$suffix"
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
     sparkSession.sessionState.catalog.resolveBuiltinOrTempFunction(name, exps)
 
@@ -57,5 +51,16 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  def localConnectServerForTesting: Option[SparkSession] = None
+  def localConnectServerForTesting(config: Map[String, String]): Option[ConnectSession] = Some(
+    new ConnectSession {
+      val utils = SparkConnectServerUtils(config)
+
+      utils.start()
+
+      override def sparkSession: SparkSession = utils.createSparkSession()
+
+      override def stopServer(): Unit = utils.stop()
+    }
+  )
+
 }

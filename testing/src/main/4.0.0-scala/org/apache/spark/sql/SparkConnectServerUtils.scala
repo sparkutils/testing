@@ -14,28 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sparkutils.testing
-
-import java.io.{File, IOException, OutputStream}
-import java.lang.ProcessBuilder.Redirect
-import java.nio.file.Paths
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.FiniteDuration
-
-import org.scalactic.source.Position
-import org.scalatest.{BeforeAndAfterAll, Suite, Tag}
-import org.scalatest.concurrent.Eventually.eventually
-import org.scalatest.concurrent.Futures.timeout
-import org.scalatest.funsuite.AnyFunSuite // scalastyle:ignore funsuite
-import org.scalatest.time.SpanSugar._ // scalastyle:ignore
+package org.apache.spark.sql
 
 import org.apache.spark.SparkBuildInfo
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
 import org.apache.spark.sql.connect.common.config.ConnectCommon
+import org.apache.spark.sql.connect.test.IntegrationTestUtils
 import org.apache.spark.sql.connect.test.IntegrationTestUtils._
 import org.apache.spark.util.ArrayImplicits._
+import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.concurrent.Waiters.timeout
+import org.scalatest.time.SpanSugar._
+
+import java.io.{File, IOException, OutputStream}
+import java.lang.ProcessBuilder.Redirect
+import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
+
+/*
+Taken directly from the Spark 4 connect codebase, with additional config insertion to allow for SparkSessionExtensions
+and custom expression code to be tested
+ */
 
 /**
  * An util class to start a local spark connect server in a different process for local E2E tests.
@@ -47,19 +48,20 @@ import org.apache.spark.util.ArrayImplicits._
  * environment variable `SPARK_DEBUG_SC_JVM_CLIENT=true` to print the server process output in the
  * console to debug server start stop problems.
  */
-object SparkConnectServerUtils {
+case class SparkConnectServerUtils(config: Map[String, String]) {
 
   // The equivalent command to start the connect server via command line:
   // bin/spark-shell --conf spark.plugins=org.apache.spark.sql.connect.SparkConnectPlugin
 
   // Server port
   val port: Int =
-    ConnectCommon.CONNECT_GRPC_BINDING_PORT + util.Random.nextInt(1000)
+    ConnectCommon.CONNECT_GRPC_BINDING_PORT + scala.util.Random.nextInt(1000)
 
   @volatile private var stopped = false
 
   private var consoleOut: OutputStream = _
   private val serverStopCommand = "q"
+  @volatile private var exitVal = 0
 
   private lazy val sparkConnect: java.lang.Process = {
     debug("Starting the Spark Connect Server...")
@@ -138,26 +140,30 @@ object SparkConnectServerUtils {
   }
 
   def stop(): Int = {
-    stopped = true
-    debug("Stopping the Spark Connect Server...")
-    try {
-      consoleOut.write(serverStopCommand.getBytes)
-      consoleOut.flush()
-      consoleOut.close()
-      if (!sparkConnect.waitFor(2, TimeUnit.SECONDS)) {
-        sparkConnect.destroyForcibly().waitFor(2, TimeUnit.SECONDS)
-      }
-      val code = sparkConnect.exitValue()
-      debug(s"Spark Connect Server is stopped with exit code: $code")
-      code
-    } catch {
-      case e: IOException if e.getMessage.contains("Stream closed") =>
-        -1
-      case e: Throwable =>
-        debug(e)
-        sparkConnect.destroyForcibly()
-        throw e
+    if (!stopped) {
+      stopped = true
+      debug("Stopping the Spark Connect Server...")
+      exitVal =
+        try {
+          consoleOut.write(serverStopCommand.getBytes)
+          consoleOut.flush()
+          consoleOut.close()
+          if (!sparkConnect.waitFor(2, TimeUnit.SECONDS)) {
+            sparkConnect.destroyForcibly().waitFor(2, TimeUnit.SECONDS)
+          }
+          val code = sparkConnect.exitValue()
+          debug(s"Spark Connect Server is stopped with exit code: $code")
+          code
+        } catch {
+          case e: IOException if e.getMessage.contains("Stream closed") =>
+            -1
+          case e: Throwable =>
+            debug(e)
+            sparkConnect.destroyForcibly()
+            throw e
+        }
     }
+    exitVal
   }
 
   def syncTestDependencies(spark: SparkSession): Unit = {
@@ -180,7 +186,6 @@ object SparkConnectServerUtils {
   }
 
   def createSparkSession(): SparkSession = {
-    SparkConnectServerUtils.start()
 
     val spark = SparkSession
       .builder()
@@ -201,49 +206,8 @@ object SparkConnectServerUtils {
     }
 
     // Auto-sync dependencies.
-    SparkConnectServerUtils.syncTestDependencies(spark)
+    syncTestDependencies(spark)
 
     spark
-  }
-}
-
-trait RemoteSparkSession
-    extends AnyFunSuite // scalastyle:ignore funsuite
-    with BeforeAndAfterAll { self: Suite =>
-  import SparkConnectServerUtils._
-  var spark: SparkSession = _
-  protected lazy val serverPort: Int = port
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    if (IntegrationTestUtils.isAssemblyJarsDirExists) {
-      spark = createSparkSession()
-    }
-  }
-
-  override def afterAll(): Unit = {
-    def isArrowAllocatorIssue(message: String): Boolean = {
-      Option(message).exists(m =>
-        m.contains("closed with outstanding") ||
-          m.contains("Memory leaked"))
-    }
-    try {
-      if (spark != null) spark.stop()
-    } catch {
-      case e: IllegalStateException if isArrowAllocatorIssue(e.getMessage) =>
-        throw e
-      case e: Throwable => debug(e)
-    }
-    spark = null
-    super.afterAll()
-  }
-
-  override protected def test(testName: String, testTags: Tag*)(testFun: => Any)(implicit
-      pos: Position): Unit = {
-    if (IntegrationTestUtils.isAssemblyJarsDirExists) {
-      super.test(testName, testTags: _*)(testFun)
-    } else {
-      super.ignore(testName, testTags: _*)(testFun)
-    }
   }
 }

@@ -30,15 +30,9 @@ object SparkTestUtils {
 
   def setPath(newPath: String) = {
     tpath.set(newPath)
-    // when this is called set the docs path as well as an offset
-    tdocpath.set(newPath + "/docs")
   }
 
   def path(suffix: String) = s"${tpath.get}/$suffix"
-
-  protected var tdocpath = new AtomicReference[String]("./docs/advanced")
-  def docDir = tpath.get
-  def docpath(suffix: String) = s"${tdocpath.get}/$suffix"
 
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
     sparkSession.sessionState.catalog.resolveBuiltinOrTempFunction(name, exps)
@@ -59,5 +53,14 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  def localConnectServerForTesting: Option[SparkSession] = None
+  /**
+   * Note, although 17.3 allows spark.api.mode you still need to register any sparksessions at the cluster level,
+   * config to use the sessions in your code is not enough
+   * @return
+   */
+  def localConnectServerForTesting: Option[ConnectSession] = Some(new ConnectSession {
+    def sparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
+
+    def stopServer(): Unit = {}
+  })
 }
