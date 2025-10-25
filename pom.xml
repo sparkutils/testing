@@ -516,6 +516,13 @@
             <version>${scalaVersion}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scalaCompatVersion}</artifactId>
+            <version>${scalatestVersion}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
