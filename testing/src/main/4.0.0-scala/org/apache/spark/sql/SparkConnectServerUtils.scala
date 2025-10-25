@@ -16,6 +16,7 @@
  */
 package org.apache.spark.sql
 
+import com.sparkutils.testing.Utils.{MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
 import org.apache.spark.SparkBuildInfo
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
@@ -35,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration
 
 /*
 Taken directly from the Spark 4 connect codebase, with additional config insertion to allow for SparkSessionExtensions
-and custom expression code to be tested
+and custom expression code to be tested.  The server is run directly via java not via spark-connect.sh
  */
 
 /**
@@ -49,6 +50,9 @@ and custom expression code to be tested
  * console to debug server start stop problems.
  */
 case class SparkConnectServerUtils(config: Map[String, String]) {
+
+  private lazy val classItems = config.getOrElse(MAIN_CLASSPATH,"")
+  private lazy val extraMainConfigItems = (config - MAIN_CLASSPATH).map(p => s"-D${p._1}=${p._2}")
 
   // The equivalent command to start the connect server via command line:
   // bin/spark-shell --conf spark.plugins=org.apache.spark.sql.connect.SparkConnectPlugin
@@ -65,25 +69,31 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
 
   private lazy val sparkConnect: java.lang.Process = {
     debug("Starting the Spark Connect Server...")
-    val connectJar =
-      findJar("sql/connect/server", "spark-connect-assembly", "spark-connect").getCanonicalPath
-
-    // To find InMemoryTableCatalog for V2 writer tests
-    val catalystTestJar =
-      findJar("sql/catalyst", "spark-catalyst", "spark-catalyst", test = true).getCanonicalPath
+//    val connectJar =
+  //    findJar("sql/connect/server", "spark-connect-assembly", "spark-connect").getCanonicalPath
 
     val command = Seq.newBuilder[String]
-    command += "bin/spark-submit"
-    command += "--driver-class-path" += connectJar
-    command += "--class" += "org.apache.spark.sql.connect.SimpleSparkConnectService"
-    command += "--jars" += catalystTestJar
-    command += "--conf" += s"spark.connect.grpc.binding.port=$port"
+    command += s"${System.getProperty("java.home")}/bin/java"
+    command += "-classpath" += connectServerJars.mkString(File.pathSeparatorChar.toString)
+    if (classItems.nonEmpty) {
+      command += s"${File.pathSeparatorChar}$classItems"
+    }
+    //command += "--driver-class-path" += connectJar
+    command += s"-Dspark.connect.grpc.binding.port=$port"
     command ++= testConfigs
-    command ++= debugConfigs
-    command += connectJar
+//    command ++= debugConfigs
+    command ++= extraMainConfigItems
+    command ++= Seq(
+      "-Dspark.master=local[*]",
+      "-Dspark.app.name=test"
+    )
+    command += "org.apache.spark.sql.connect.SimpleSparkConnectService"
+
+    // command += connectJar
     val builder = new ProcessBuilder(command.result(): _*)
     builder.directory(new File(sparkHome))
     val environment = builder.environment()
+    environment.put("SPARK_USER", "test")
     environment.remove("SPARK_DIST_CLASSPATH")
     if (isDebug) {
       builder.redirectError(Redirect.INHERIT)
@@ -131,7 +141,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
       // Testing SPARK-49673, setting maxBatchSize to 10MiB
       s"spark.connect.grpc.arrow.maxBatchSize=${10 * 1024 * 1024}",
       // Disable UI
-      "spark.ui.enabled=false").flatMap(v => "--conf" :: v :: Nil)
+      "spark.ui.enabled=false").map(v => s"-D$v")
   }
 
   def start(): Unit = {
@@ -167,9 +177,11 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
   }
 
   def syncTestDependencies(spark: SparkSession): Unit = {
-    // Both SBT & Maven pass the test-classes as a directory instead of a jar.
-    val testClassesPath = Paths.get(IntegrationTestUtils.connectClientTestClassDir)
-    spark.client.artifactManager.addClassDir(testClassesPath)
+    // add all test dirs in the classpath
+    testClassPaths.map(e => Paths.get(e)).foreach {
+      testClassesPath =>
+        spark.client.artifactManager.addClassDir(testClassesPath)
+    }
 
     // We need scalatest & scalactic on the session's classpath to make the tests work.
     val jars = System
@@ -193,7 +205,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
         SparkConnectClient
           .builder()
           .userId("test")
-          .port(port)
+          .port(15509)//port)
           .retryPolicy(RetryPolicy
             .defaultPolicy()
             .copy(maxRetries = Some(10), maxBackoff = Some(FiniteDuration(30, "s"))))

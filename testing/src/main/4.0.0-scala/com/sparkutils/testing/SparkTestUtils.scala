@@ -44,7 +44,6 @@ object SparkTestUtils {
     else
       sparkPlan
 
-
   def enumToScala[A](enum: java.util.Enumeration[A]) = {
     import scala.collection.JavaConverters._
 
@@ -54,8 +53,13 @@ object SparkTestUtils {
   def localConnectServerForTesting(config: Map[String, String]): Option[ConnectSession] = Some(
     new ConnectSession {
       val utils = SparkConnectServerUtils(config)
-
-      utils.start()
+/*
+      val th = System.getProperty("spark.test.home")
+      if (th eq null) {
+        System.setProperty("spark.test.home",".")
+      }
+      System.setProperty("SPARK_DEBUG_SC_JVM_CLIENT","true")
+      utils.start()*/
 
       override def sparkSession: SparkSession = utils.createSparkSession()
 

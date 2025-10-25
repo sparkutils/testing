@@ -364,17 +364,26 @@
             </properties>
 
             <dependencies>
+                <!-- actual client code needed to connect -->
                 <dependency>
-                    <groupId>org.apache.spark</groupId>
+                    <groupId>org.apache.spark.</groupId>
                     <artifactId>spark-connect-client-jvm_${scalaCompatVersion}</artifactId>
                     <version>${sparkVersion}</version>
                     <scope>provided</scope>
                 </dependency>
+                <!-- shared test code - Probably shouldn't need it -->
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-connect-client-jvm_${scalaCompatVersion}</artifactId>
                     <version>${sparkVersion}</version>
                     <classifier>tests</classifier>
+                    <scope>provided</scope>
+                </dependency>
+                <!-- actual server to spawn for testing -->
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-connect_${scalaCompatVersion}</artifactId>
+                    <version>${sparkVersion}</version>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
@@ -480,16 +489,16 @@
             </properties>
         </profile>
         <profile>
-            <id>17.0.dbr</id>
+            <id>17.3.dbr</id>
             <properties>
-                <shimRuntime>17.0.dbr</shimRuntime>
-                <shimCompilationRuntime>17.0.dbr</shimCompilationRuntime>
-                <dbrCompatVersion>17.0.dbr_</dbrCompatVersion>
+                <shimRuntime>17.3.dbr</shimRuntime>
+                <shimCompilationRuntime>17.3.dbr</shimCompilationRuntime>
+                <dbrCompatVersion>17.3.dbr_</dbrCompatVersion>
                 <scalaVersion>2.13.16</scalaVersion>
                 <scalaCompatVersion>2.13</scalaCompatVersion>
                 <sparkVersion>4.0.0</sparkVersion>
                 <sparkCompatVersion>4.0</sparkCompatVersion>
-                <profileDir>17.0.dbr</profileDir>
+                <profileDir>17.3.dbr</profileDir>
                 <jacksonVersion>2.14.2</jacksonVersion> <!-- scalameter dependency is 2.9.10 so perf tests runs need to change it -->
                 <guavaVersion>15.0</guavaVersion> <!-- databricks runtime version -->
                 <parserCombinatorVersion>1.1.2</parserCombinatorVersion> <!-- databricks runtime version -->
@@ -612,8 +621,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
-                        <source>8</source>
-                        <target>8</target>
+                        <source>17</source>
+                        <target>17</target>
                     </configuration>
                 </plugin>
 
