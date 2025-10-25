@@ -58,9 +58,10 @@ object SparkTestUtils {
    * config to use the sessions in your code is not enough
    * @return
    */
-  def localConnectServerForTesting: Option[ConnectSession] = Some(new ConnectSession {
-    def sparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
+  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] =
+    Some(new ConnectSession {
+      def sparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
 
-    def stopServer(): Unit = {}
-  })
+      def stopServer(): Unit = {}
+    })
 }

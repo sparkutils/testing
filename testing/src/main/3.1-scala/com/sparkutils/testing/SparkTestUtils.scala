@@ -58,5 +58,5 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  def localConnectServerForTesting: Option[ConnectSession] = None
+  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = None
 }
