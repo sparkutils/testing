@@ -50,18 +50,18 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  def localConnectServerForTesting(config: Map[String, String]): Option[ConnectSession] = Some(
+  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = Some(
     new ConnectSession {
-      val utils = SparkConnectServerUtils(config)
-/*
+      val utils = SparkConnectServerUtils(serverConfig)
+
       val th = System.getProperty("spark.test.home")
       if (th eq null) {
         System.setProperty("spark.test.home",".")
       }
-      System.setProperty("SPARK_DEBUG_SC_JVM_CLIENT","true")
-      utils.start()*/
+      System.setProperty("spark.debug.sc.jvm.client","true")
+      utils.start()
 
-      override def sparkSession: SparkSession = utils.createSparkSession()
+      override def sparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
 
       override def stopServer(): Unit = utils.stop()
     }

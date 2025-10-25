@@ -36,14 +36,8 @@ trait ClassicUtils extends SparkClassicConfig {
       None
     else
       Some{
-        val configRaw = sparkClassicConfig()
-        val cmap = configRaw.toMap
-        val sparkSessionConf = SparkSession.builder()
-        val sparkSession =
-          cmap.foldLeft(sparkSessionConf){
-            (conf, pair) =>
-              conf.config(pair._1, pair._2)
-          }.getOrCreate()
+        val config = sparkClassicConfig()
+        val sparkSession = SparkSession.builder().config(config).getOrCreate()
         // only a visual change
         // sparkSession.conf.set("spark.sql.legacy.castComplexTypesToString.enabled", true)
         sparkSession.sparkContext.setLogLevel(loggingLevel) // set to debug to get actual code lines etc.

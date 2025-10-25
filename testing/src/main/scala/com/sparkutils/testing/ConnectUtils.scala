@@ -9,7 +9,7 @@ trait ConnectUtils extends SparkConnectConfig with SparkClassicConfig {
 
   def connectSparkSession: Option[ConnectSession] =
     if (!disableConnectTesting) {
-      SparkTestUtils.localConnectServerForTesting(sparkClassicConfig() ++ sparkConnectConfig())
+      SparkTestUtils.localConnectServerForTesting(sparkClassicConfig() ++ sparkConnectServerConfig(), sparkConnectClientConfig())
     } else
       None
 }

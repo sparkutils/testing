@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.Column
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -41,7 +41,7 @@ object Testing {
 object SparkVersions {
 
   lazy val sparkFullVersion = {
-    val pos = classOf[Expression].getPackage.getSpecificationVersion
+    val pos = classOf[Column].getPackage.getSpecificationVersion
     if ((pos eq null) || pos == "0.0") // DBR is always null, Fabric 0.0
       SparkSession.active.version
     else

@@ -361,16 +361,12 @@
                 <framelessOrg>com.sparkutils</framelessOrg>
 
                 <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
+                <!-- spark-api is pulled from spark-sql, but for this library we need to use connect-client instead -->
+                <spark.api>spark-connect-client-jvm</spark.api>
             </properties>
 
             <dependencies>
-                <!-- actual client code needed to connect -->
-                <dependency>
-                    <groupId>org.apache.spark.</groupId>
-                    <artifactId>spark-connect-client-jvm_${scalaCompatVersion}</artifactId>
-                    <version>${sparkVersion}</version>
-                    <scope>provided</scope>
-                </dependency>
+                <!-- actual client code needed to connect is passed via spark.api -->
                 <!-- shared test code - Probably shouldn't need it -->
                 <dependency>
                     <groupId>org.apache.spark</groupId>
@@ -570,7 +566,8 @@
 
         <scalatestMavenPluginVersion>2.2.0</scalatestMavenPluginVersion>
 
-
+        <!-- lets the runtime package depend on spark-sql for below 4 -->
+        <spark.api>spark-sql</spark.api>
     </properties>
 <!--
     <repositories>

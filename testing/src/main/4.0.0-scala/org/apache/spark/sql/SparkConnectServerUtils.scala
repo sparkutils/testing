@@ -54,6 +54,23 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
   private lazy val classItems = config.getOrElse(MAIN_CLASSPATH,"")
   private lazy val extraMainConfigItems = (config - MAIN_CLASSPATH).map(p => s"-D${p._1}=${p._2}")
 
+  private val jvmOpts = Seq(
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+    "--add-opens=java.base/java.io=ALL-UNNAMED",
+    "--add-opens=java.base/java.net=ALL-UNNAMED",
+    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+    "--add-opens=java.base/java.util=ALL-UNNAMED",
+    "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+    "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED",
+    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+    "--add-opens=java.base/sun.nio.cs=ALL-UNNAMED",
+    "--add-opens=java.base/sun.security.action=ALL-UNNAMED",
+    "--add-opens=java.base/sun.util.calendar=ALL-UNNAMED",
+    "-XX:+IgnoreUnrecognizedVMOptions"
+  )
+
   // The equivalent command to start the connect server via command line:
   // bin/spark-shell --conf spark.plugins=org.apache.spark.sql.connect.SparkConnectPlugin
 
@@ -74,6 +91,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
 
     val command = Seq.newBuilder[String]
     command += s"${System.getProperty("java.home")}/bin/java"
+    command ++= jvmOpts
     command += "-classpath" += connectServerJars.mkString(File.pathSeparatorChar.toString)
     if (classItems.nonEmpty) {
       command += s"${File.pathSeparatorChar}$classItems"
@@ -176,6 +194,10 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     exitVal
   }
 
+}
+
+object SparkConnectServerUtils {
+
   def syncTestDependencies(spark: SparkSession): Unit = {
     // add all test dirs in the classpath
     testClassPaths.map(e => Paths.get(e)).foreach {
@@ -190,22 +212,23 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
       .filter { e: String =>
         val fileName = e.substring(e.lastIndexOf(File.separatorChar) + 1)
         fileName.endsWith(".jar") &&
-        (fileName.startsWith("scalatest") || fileName.startsWith("scalactic") ||
-          (fileName.startsWith("spark-catalyst") && fileName.endsWith("-tests")))
+          (fileName.startsWith("scalatest") || fileName.startsWith("scalactic") ||
+            (fileName.startsWith("spark-catalyst") && fileName.endsWith("-tests")))
       }
       .map(e => Paths.get(e).toUri)
     spark.client.artifactManager.addArtifacts(jars.toImmutableArraySeq)
   }
 
-  def createSparkSession(): SparkSession = {
+  def createSparkSession(port: Int, clientConfig: Map[String, String]): SparkSession = {
 
     val spark = SparkSession
       .builder()
+      .config(clientConfig)
       .client(
         SparkConnectClient
           .builder()
           .userId("test")
-          .port(15509)//port)
+          .port(port)
           .retryPolicy(RetryPolicy
             .defaultPolicy()
             .copy(maxRetries = Some(10), maxBackoff = Some(FiniteDuration(30, "s"))))
