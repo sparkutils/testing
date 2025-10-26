@@ -68,4 +68,11 @@ object Utils {
    * expressions
    */
   lazy val mainClassPathsConfig: (String, String) = MAIN_CLASSPATH -> mainClassPaths.mkString(File.pathSeparatorChar.toString)
+
+  /**
+   * Use this configuration to add your test classes to connect servers, for example custom query plans or
+   * expressions in your test classes
+   */
+  lazy val testClassesPathsConfig: (String, String) = MAIN_CLASSPATH -> testClassPaths.mkString(File.pathSeparatorChar.toString)
+
 }

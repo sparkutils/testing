@@ -138,6 +138,9 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
   def not_Databricks(thunk: => Unit) =
     if (!onDatabricks) thunk
 
+  /**
+   * Do not run the test unless shouldRunClusterTests is true
+   */
   def not_Cluster(thunk: => Unit): Unit =
     if (TestUtilsEnvironment.shouldRunClusterTests) thunk
 
@@ -160,6 +163,10 @@ object TestUtils {
       else
         false
 
+  /**
+   * If setShouldDebugLog is true run the thunk
+   * @param thunk
+   */
   def debug(thunk: => Unit): Unit =
     TestUtilsEnvironment.debug(thunk)
 

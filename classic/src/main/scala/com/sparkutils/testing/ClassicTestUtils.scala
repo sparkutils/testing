@@ -1,16 +1,36 @@
 package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicSparkTestUtils.getCorrectPlan
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.{Dataset, ShimUtils, SparkSession}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
 
 import java.util.concurrent.atomic.AtomicBoolean
+import scala.collection.immutable.Seq
 
 trait ClassicTestUtils extends Serializable {
 
   protected[testing] val inConnect = new AtomicBoolean(false)
+
+  /**
+   * Only runs thunk when the test is in classic mode
+   * @param thunk
+   */
+  def classicOnly(thunk: => Unit) =
+    if (!inConnect.get()) {
+      thunk
+    }
+
+  /**
+   * Only runs thunk when the test is in connect mode
+   * @param thunk
+   */
+  def connectOnly(thunk: => Unit) =
+    if (inConnect.get()) {
+      thunk
+    }
 
   def sparkSession: SparkSession
 
@@ -43,6 +63,9 @@ trait ClassicTestUtils extends Serializable {
 }
 
 object ClassicTestUtils {
+
+  def registerFunction(sparkSession: SparkSession): (String, Seq[Expression] => Expression) => Unit =
+    ShimUtils.registerFunction(sparkSession.sessionState.functionRegistry) _
 
   /**
    * Gets pushdowns from a dataset

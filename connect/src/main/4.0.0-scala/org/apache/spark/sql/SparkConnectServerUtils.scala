@@ -93,10 +93,15 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     val command = Seq.newBuilder[String]
     command += s"${System.getProperty("java.home")}/bin/java"
     command ++= jvmOpts
-    command += "-classpath" += connectServerJars.mkString(File.pathSeparatorChar.toString)
-    if (classItems.nonEmpty) {
-      command += s"${File.pathSeparatorChar}$classItems"
-    }
+    val classPath = connectServerJars.mkString(File.pathSeparatorChar.toString)
+
+    command += "-classpath" += (classPath + (
+      if (classItems.nonEmpty)
+        s"${File.pathSeparatorChar}$classItems"
+      else
+        ""
+      )
+    )
     //command += "--driver-class-path" += connectJar
     command += s"-Dspark.connect.grpc.binding.port=$port"
     command ++= testConfigs
@@ -106,7 +111,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
       "-Dspark.master=local[*]",
       "-Dspark.app.name=test"
     )
-    command += "org.apache.spark.sql.connect.SimpleSparkConnectService"
+    command += "org.apache.spark.sql.connect.service.SparkConnectServer" // "org.apache.spark.sql.connect.SimpleSparkConnectService"
 
     // command += connectJar
     val builder = new ProcessBuilder(command.result(): _*)

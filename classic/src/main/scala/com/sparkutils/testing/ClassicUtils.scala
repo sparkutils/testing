@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
-import com.sparkutils.testing.Utils.booleanEnv
+import com.sparkutils.testing.Utils.{booleanEnv, classPathJars}
 import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.SparkSession
@@ -10,7 +10,7 @@ import org.apache.spark.sql.SparkSession
 /**
  * Functionality that only applies to Spark Classic
  */
-trait ClassicUtils extends SparkClassicConfig {
+trait ClassicUtils extends SparkClassicConfig with ClassicTestUtils {
 
   val disableClassicTesting = booleanEnv("SPARKUTILS_DISABLE_CLASSIC_TESTS")
 
@@ -81,28 +81,32 @@ trait ClassicUtils extends SparkClassicConfig {
   }
 
   // if this blows then debug on CodeGenerator 1294, 1299 and grab code.body
-  def forceCodeGen[T](f: => T): T = {
+  def forceCodeGen[T](f: => T): T = if (!inConnect.get()) {
     val codegenMode = CodegenObjectFactoryMode.CODEGEN_ONLY.toString
 
     withSQLConf(SQLConf.CODEGEN_FACTORY_MODE.key -> codegenMode) {
       f
     }
-  }
+  } else
+    f
 
-  def forceInterpreted[T](f: => T): T = {
+  def forceInterpreted[T](f: => T): T = if (!inConnect.get()) {
     val codegenMode = CodegenObjectFactoryMode.NO_CODEGEN.toString
 
     withSQLConf(SQLConf.CODEGEN_FACTORY_MODE.key -> codegenMode) {
       f
     }
-  }
+  } else
+    f
 
-  def inCodegen: Boolean = {
-    val r = SQLConf.get.getConfString(SQLConf.CODEGEN_FACTORY_MODE.key)
+  def inCodegen: Boolean =
+    if (!inConnect.get()) {
+      val r = SQLConf.get.getConfString(SQLConf.CODEGEN_FACTORY_MODE.key)
 
-    r == CodegenObjectFactoryMode.CODEGEN_ONLY.toString ||
-      r == CodegenObjectFactoryMode.FALLBACK.toString
-  }
+      r == CodegenObjectFactoryMode.CODEGEN_ONLY.toString ||
+        r == CodegenObjectFactoryMode.FALLBACK.toString
+    } else
+      false
 
   /**
    * Forces resolveWith to be used where possible, Quality only
@@ -127,7 +131,13 @@ trait ClassicUtils extends SparkClassicConfig {
    * @return
    */
   def evalCodeGens[T](f: => T):(T,T,T,T)  =
-    (forceCodeGen(f), forceInterpreted(f), forceCodeGen(doWithResolve(f)), forceInterpreted(doWithResolve(f)))
+    if (!inConnect.get())
+      (forceCodeGen(f), forceInterpreted(f), forceCodeGen(doWithResolve(f)), forceInterpreted(doWithResolve(f)))
+    else {
+      val r = f
+      (r, r, r, r)
+    }
+
 
   /**
    * runs the same test with both eval and codegen
@@ -135,14 +145,19 @@ trait ClassicUtils extends SparkClassicConfig {
    * @tparam T
    * @return
    */
-  def evalCodeGensNoResolve[T](f: => T):(T,T)  =
-    (forceCodeGen(f), forceInterpreted(f))
+  def evalCodeGensNoResolve[T](f: => T):(T,T) =
+    if (!inConnect.get())
+      (forceCodeGen(f), forceInterpreted(f))
+    else {
+      val r = f
+      (r, r)
+    }
 
   /**
    * Sets all SQL configurations specified in `pairs`, calls `f`, and then restores all SQL
    * configurations.
    */
-  protected def withSQLConf[T](pairs: (String, String)*)(f: => T): T = {
+  protected def withSQLConf[T](pairs: (String, String)*)(f: => T): T = if (!inConnect.get()) {
     val conf = SQLConf.get
     val (keys, values) = pairs.unzip
     val currentValues = keys.map { key =>
@@ -162,6 +177,8 @@ trait ClassicUtils extends SparkClassicConfig {
         case (key, None) => conf.unsetConf(key)
       }
     }
+  } else {
+    f
   }
 
 }
