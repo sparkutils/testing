@@ -64,7 +64,7 @@ trait ClassicTestUtils extends Serializable {
 
 object ClassicTestUtils {
 
-  def registerFunction(sparkSession: SparkSession): (String, Seq[Expression] => Expression) => Unit =
+  def registerFunction(sparkSession: SparkSession): (String, scala.Seq[Expression] => Expression) => Unit =
     ShimUtils.registerFunction(sparkSession.sessionState.functionRegistry) _
 
   /**
