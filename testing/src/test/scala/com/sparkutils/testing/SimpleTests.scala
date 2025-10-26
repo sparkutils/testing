@@ -20,7 +20,7 @@ case class Echo(child: Expression) extends UnaryExpression {
 
   override def eval(input: InternalRow): Any = child.eval(input)
 
-  override protected def withNewChildInternal(newChild: Expression): Expression = Echo(newChild)
+  protected def withNewChildInternal(newChild: Expression): Expression = Echo(newChild)
 }
 
 object Echo {
