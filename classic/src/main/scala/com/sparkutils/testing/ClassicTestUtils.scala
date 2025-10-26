@@ -4,7 +4,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
-import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
+import org.apache.spark.sql.sparkutils.testing.PlanHelper
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -44,16 +44,6 @@ trait ClassicTestUtils extends Serializable {
 
 object ClassicTestUtils {
 
-  def getCorrectPlan(sparkPlan: SparkPlan): SparkPlan =
-    if (sparkPlan.children.isEmpty)
-      // assume it's AQE
-      sparkPlan match {
-        case aq: AdaptiveSparkPlanExec => aq.initialPlan
-        case _ => sparkPlan
-      }
-    else
-      sparkPlan
-
   /**
    * Gets pushdowns from a dataset
    * @return
@@ -67,7 +57,7 @@ object ClassicTestUtils {
    * @return
    */
   def getPushDowns(sparkPlan: SparkPlan): Seq[Filter] =
-    getCorrectPlan(sparkPlan).collect {
+    PlanHelper.getCorrectPlan(sparkPlan).collect {
       case fs: FileSourceScanExec =>
         import scala.reflect.runtime.{universe => ru}
 
