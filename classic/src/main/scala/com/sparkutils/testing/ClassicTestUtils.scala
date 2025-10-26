@@ -91,6 +91,6 @@ object ClassicTestUtils {
         val res = m.apply(fs).asInstanceOf[Seq[Filter]]
 
         res
-    }.flatten
+    }.flatten.toIndexedSeq
 
 }
