@@ -42,7 +42,7 @@ jobs:
     secrets: inherit
 
 
-  notest_builds:
+  noTest_builds:
     uses: sparkutils/building/.github/workflows/run_build.yml@main
     with:
       testString: -DskipTests
@@ -53,7 +53,7 @@ jobs:
         }
     secrets: inherit
 
-  notest_builds_21:
+  noTest_builds_21:
     uses: sparkutils/building/.github/workflows/run_build.yml@main
     with:
       testString: -DskipTests

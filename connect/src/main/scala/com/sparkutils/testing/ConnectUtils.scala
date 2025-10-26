@@ -2,7 +2,7 @@ package com.sparkutils.testing
 
 import com.sparkutils.testing.Utils.booleanEnv
 import org.apache.spark.sql.SparkConnectServerUtils
-import org.apache.spark.sql.connect.SparkSession
+import org.apache.spark.sql.SparkSession
 
 trait ConnectUtils extends SparkConnectConfig {
 

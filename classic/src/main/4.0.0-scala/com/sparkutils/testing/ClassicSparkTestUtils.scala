@@ -4,8 +4,6 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.internal.SQLConf
 
-case class AnalysisException(message: String) extends Exception(message)
-
 object ClassicSparkTestUtils {
 
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
