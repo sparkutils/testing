@@ -19,21 +19,16 @@ object SparkTestUtils {
    */
   val skipHofs = false
 
-  def testStaticConfigKey(k: String) =
-    if (SQLConf.staticConfKeys.contains(k)) {
-      throw new AnalysisException(s"Cannot modify the value of a static config: $k")
-    }
-
   protected var tpath = new AtomicReference[String]("./target/testData")
 
   def ouputDir = tpath.get
-
 
   def setPath(newPath: String) = {
     tpath.set(newPath)
   }
 
   def path(suffix: String) = s"${tpath.get}/$suffix"
+
 
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
     Some(sparkSession.sessionState.catalog.lookupFunction(FunctionIdentifier(name), exps))
@@ -54,5 +49,4 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = None
 }

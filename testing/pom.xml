@@ -23,6 +23,16 @@
         </dependency>
         <dependency>
             <groupId>com.sparkutils</groupId>
+            <artifactId>testing-classic_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sparkutils</groupId>
+            <artifactId>testing-connect_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sparkutils</groupId>
             <artifactId>shim_compilation_${shimCompilationRuntime}_${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
             <version>${shimCompilationVersion}</version>
             <scope>provided</scope>

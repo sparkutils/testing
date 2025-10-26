@@ -1,8 +1,9 @@
 import com.sparkutils.testing.{ClassicUtils, SparkConnectConfig, SparkTestUtils}
+import org.apache.spark.sql.SparkConnectServerUtils
 
 object testy {
   def main(args: Array[String]): Unit = {
-    val oConnectSession = SparkTestUtils.localConnectServerForTesting(new SparkConnectConfig{}.sparkConnectServerConfig(),Map.empty)
+    val oConnectSession = SparkConnectServerUtils.localConnectServerForTesting(new SparkConnectConfig{}.sparkConnectServerConfig(),Map.empty)
     oConnectSession.foreach{
       connectSession =>
         val session = connectSession.sparkSession

@@ -3,6 +3,7 @@ package com.sparkutils.testing
 import java.util.concurrent.atomic.AtomicReference
 import org.apache.spark.sql.{SparkConnectServerUtils, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.connect.test.SparkConnectServerUtils
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.execution.{FileSourceScanExec, LocalTableScanExec, SparkPlan}
 import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
@@ -16,10 +17,8 @@ object SparkTestUtils {
    */
   val skipHofs = false
 
-  def testStaticConfigKey(k: String) =
-    if (SQLConf.isStaticConfigKey(k)) {
-      throw new AnalysisException(s"Cannot modify the value of a static config: $k")
-    }
+  def testStaticConfigKey(k: String): Unit =
+    ClassicSparkTestUtils.testStaticConfigKey(k)
 
   protected var tpath = new AtomicReference[String]("./target/testData")
 
@@ -32,39 +31,12 @@ object SparkTestUtils {
   def path(suffix: String) = s"${tpath.get}/$suffix"
 
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
-    sparkSession.sessionState.catalog.resolveBuiltinOrTempFunction(name, exps)
-
-  def getCorrectPlan(sparkPlan: SparkPlan): SparkPlan =
-    if (sparkPlan.children.isEmpty)
-    // assume it's AQE
-      sparkPlan match {
-        case aq: AdaptiveSparkPlanExec => aq.initialPlan
-        case _ => sparkPlan
-      }
-    else
-      sparkPlan
+    ClassicSparkTestUtils.resolveBuiltinOrTempFunction(sparkSession)(name, exps)
 
   def enumToScala[A](enum: java.util.Enumeration[A]) = {
     import scala.collection.JavaConverters._
 
     enumerationAsScalaIterator(enum)
   }
-
-  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = Some(
-    new ConnectSession {
-      val utils = SparkConnectServerUtils(serverConfig)
-
-      val th = System.getProperty("spark.test.home")
-      if (th eq null) {
-        System.setProperty("spark.test.home",".")
-      }
-      System.setProperty("spark.debug.sc.jvm.client","true")
-      utils.start()
-
-      override def sparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
-
-      override def stopServer(): Unit = utils.stop()
-    }
-  )
 
 }

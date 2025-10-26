@@ -19,11 +19,6 @@ object SparkTestUtils {
    */
   val skipHofs = false
 
-  def testStaticConfigKey(k: String) =
-    if (SQLConf.isStaticConfigKey(k)) {
-      throw new AnalysisException(s"Cannot modify the value of a static config: $k")
-    }
-
   protected var tpath = new AtomicReference[String]("./target/testData")
 
   def ouputDir = tpath.get
@@ -53,6 +48,4 @@ object SparkTestUtils {
 
     enumerationAsScalaIterator(enum)
   }
-
-  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = None
 }

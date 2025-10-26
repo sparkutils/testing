@@ -5,13 +5,12 @@ import org.apache.spark.sql.{Dataset, Row, SQLContext, SparkSession}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
-import com.sparkutils.testing.SparkTestUtils.getCorrectPlan
 
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.reflect.io.Directory
 
-trait TestUtils extends SessionStrategy with Serializable {
+trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils {
 
   // always set
   Testing.setTesting()
@@ -154,21 +153,6 @@ trait TestUtils extends SessionStrategy with Serializable {
     }
   }
 
-  def testPlan(logicalPlanRule: org.apache.spark.sql.catalyst.rules.Rule[LogicalPlan], secondRunWithoutPlan: Boolean = true, disable: Int => Boolean = _ => false)(thunk: => Unit): Unit = {
-    val cur = SparkSession.getActiveSession.get.experimental.extraOptimizations
-    try{
-      if (!disable(sparkVersionNumericMajor)) {
-        SparkSession.getActiveSession.get.experimental.extraOptimizations = SparkSession.getActiveSession.get.experimental.extraOptimizations :+ logicalPlanRule
-      }
-      thunk
-    } finally {
-      SparkSession.getActiveSession.get.experimental.extraOptimizations = cur
-      if (secondRunWithoutPlan) {
-        thunk // re-run it
-      }
-    }
-  }
-
 }
 
 object TestUtils {
@@ -187,32 +171,6 @@ object TestUtils {
         anyCauseHas(t.getCause, f)
       else
         false
-
-  /**
-   * Gets pushdowns from a dataset
-   * @return
-   */
-  def getPushDowns[T](dataset: Dataset[T]): Seq[Filter] =
-    getPushDowns(dataset.queryExecution.executedPlan)
-
-  /**
-   * Gets pushdowns from a FileSourceScanExec from a plan
-   * @param sparkPlan
-   * @return
-   */
-  def getPushDowns(sparkPlan: SparkPlan): Seq[Filter] =
-    getCorrectPlan(sparkPlan).collect {
-      case fs: FileSourceScanExec =>
-        import scala.reflect.runtime.{universe => ru}
-
-        val runtimeMirror = ru.runtimeMirror(getClass.getClassLoader)
-        val instanceMirror = runtimeMirror.reflect(fs)
-        val getter = ru.typeOf[FileSourceScanExec].member(ru.TermName("pushedDownFilters")).asTerm.getter
-        val m = instanceMirror.reflectMethod(getter.asMethod)
-        val res = m.apply(fs).asInstanceOf[Seq[Filter]]
-
-        res
-    }.flatten
 
   def debug(thunk: => Unit): Unit =
     TestUtilsEnvironment.debug(thunk)

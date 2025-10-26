@@ -18,11 +18,6 @@ object SparkTestUtils {
    */
   val skipHofs = false
 
-  def testStaticConfigKey(k: String) =
-    if (SQLConf.isStaticConfigKey(k)) {
-      throw new AnalysisException(s"Cannot modify the value of a static config: $k")
-    }
-
   protected var tpath = new AtomicReference[String]("./target/testData")
 
   def ouputDir = tpath.get
@@ -53,15 +48,4 @@ object SparkTestUtils {
     enumerationAsScalaIterator(enum)
   }
 
-  /**
-   * Note, although 17.3 allows spark.api.mode you still need to register any sparksessions at the cluster level,
-   * config to use the sessions in your code is not enough
-   * @return
-   */
-  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] =
-    Some(new ConnectSession {
-      def sparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
-
-      def stopServer(): Unit = {}
-    })
 }

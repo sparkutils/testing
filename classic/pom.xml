@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>  <!-- rebuild -->
+
+    <parent>
+        <artifactId>testing-root_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+        <groupId>com.sparkutils</groupId>
+        <version>${revision}</version>
+    </parent>
+    <version>${project.parent.version}</version>
+    <packaging>jar</packaging>
+
+    <artifactId>testing-classic_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+
+    <name>Classic Testing</name>
+    <description>A collection of helper utilities for testing Spark</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sparkutils</groupId>
+            <artifactId>testing-runtime_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sparkutils</groupId>
+            <artifactId>shim_compilation_${shimCompilationRuntime}_${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${shimCompilationVersion}</version>
+            <scope>provided</scope>
+            <classifier>sources</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-sql_${scalaCompatVersion}</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.sparkutils</groupId>
+            <artifactId>shim_runtime_${shimRuntime}_${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${shimRuntimeVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.globalmentor</groupId>
+            <artifactId>hadoop-bare-naked-local-fs</artifactId>
+            <version>${naked-local-fs-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scalaCompatVersion}</artifactId>
+            <version>${sparkVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scalaVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scalaCompatVersion}</artifactId>
+            <version>${scalatestVersion}</version>
+        </dependency>
+   <!--     <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junitVersion}</version>
+        </dependency>
+-->
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-collection-compat_${scalaCompatVersion}</artifactId>
+            <version>${scalaCollectionCompatVersion}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <testResources>
+            <testResource>
+                <directory>testing/src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${mavenCompilerPluginVersion}</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/scala</source>
+                                <source>src/main/${profileDir}-scala</source>
+                                <source>${project.build.directory}/shim_compilation_${shimCompilationRuntime}_${sparkCompatVersion}_${scalaCompatVersion}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>for-scaladocs-etc</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/scala</source>
+                                <source>src/main/${profileDir}-scala</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/scala</source>
+                                <source>src/test/${profileDir}-scala</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

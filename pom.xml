@@ -29,6 +29,8 @@
 
     <modules>
         <module>runtime</module>
+        <module>classic</module>
+        <module>connect</module>
         <module>testing</module>
     </modules>
 
@@ -277,7 +279,7 @@
 
                 <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
                 <!-- spark-api is pulled from spark-sql, but for this library we need to use connect-client instead -->
-                <spark.api>spark-connect-client-jvm</spark.api>
+                <spark.api>spark-sql-api</spark.api>
             </properties>
 
             <dependencies>
