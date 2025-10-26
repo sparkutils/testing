@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sparkutils</groupId>
-  <artifactId>testing_4.0.0.oss_4.0_2.13</artifactId>
+  <artifactId>testing-classic_4.0.0.oss_4.0_2.13</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>Testing</name>
+  <name>Classic Testing</name>
   <description>A collection of helper utilities for testing Spark</description>
-  <url>https://sparkutils.github.io/testing/testing_4.0.0.oss_4.0_2.13/</url>
+  <url>https://sparkutils.github.io/testing/testing-classic_4.0.0.oss_4.0_2.13/</url>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -20,9 +20,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/sparkutils/testing.git/testing_4.0.0.oss_4.0_2.13</connection>
-    <developerConnection>scm:git:ssh://github.com:sparkutils/testing.git/testing_4.0.0.oss_4.0_2.13</developerConnection>
-    <url>http://github.com/sparkutils/testing/tree/master/testing_4.0.0.oss_4.0_2.13</url>
+    <connection>scm:git:git://github.com/sparkutils/testing.git/testing-classic_4.0.0.oss_4.0_2.13</connection>
+    <developerConnection>scm:git:ssh://github.com:sparkutils/testing.git/testing-classic_4.0.0.oss_4.0_2.13</developerConnection>
+    <url>http://github.com/sparkutils/testing/tree/master/testing-classic_4.0.0.oss_4.0_2.13</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -37,6 +37,12 @@
     </snapshotRepository>
   </distributionManagement>
   <dependencies>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.13</artifactId>
+      <version>4.0.0</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>com.sparkutils</groupId>
       <artifactId>testing-runtime_4.0.0.oss_4.0_2.13</artifactId>
@@ -67,12 +73,6 @@
       <artifactId>hadoop-bare-naked-local-fs</artifactId>
       <version>0.1.0</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-sql_2.13</artifactId>
-      <version>4.0.0</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>

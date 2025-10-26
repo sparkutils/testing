@@ -21,8 +21,6 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
    */
   def sqlContext: SQLContext = sparkSession.sqlContext // mode specific classicSparkSessionF.sqlContext
 
-  protected[testing] val inConnect = new AtomicBoolean(false)
-
   /**
    * returns the current sparkSession, when connect is enabled AND the active session it returns a connect SparkSession, otherwise classic
    * @return
@@ -142,16 +140,6 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
 
   def not_Cluster(thunk: => Unit): Unit =
     if (TestUtilsEnvironment.shouldRunClusterTests) thunk
-
-  /**
-   * Only run when the extension is enabled
-   */
-  def onlyWithExtension(thunk: => Unit): Unit = {
-    val extensions = sparkSession.sparkContext.getConf.get("spark.sql.extensions","")
-    if (extensions.indexOf("com.sparkutils.quality.impl.extension.QualitySparkExtension") > -1) {
-      thunk
-    }
-  }
 
 }
 

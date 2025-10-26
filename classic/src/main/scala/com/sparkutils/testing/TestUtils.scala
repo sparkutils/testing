@@ -6,7 +6,13 @@ import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 trait ClassicTestUtils extends Serializable {
+
+  protected[testing] val inConnect = new AtomicBoolean(false)
+
+  def sparkSession: SparkSession
 
   val sparkVersionNumericMajor: Int
 
@@ -25,6 +31,15 @@ trait ClassicTestUtils extends Serializable {
     }
   }
 
+  /**
+   * Only run when the extension is enabled and in classic mode
+   */
+  def onlyWithExtension(thunk: => Unit): Unit = if (!inConnect.get()) {
+    val extensions = sparkSession.sparkContext.getConf.get("spark.sql.extensions","")
+    if (extensions.indexOf("com.sparkutils.quality.impl.extension.QualitySparkExtension") > -1) {
+      thunk
+    }
+  }
 }
 
 object ClassicTestUtils {

@@ -16,6 +16,14 @@
     <description>A collection of helper utilities for testing Spark</description>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scalaCompatVersion}</artifactId>
+            <version>${sparkVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.sparkutils</groupId>
             <artifactId>testing-runtime_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
@@ -44,13 +52,6 @@
             <groupId>com.globalmentor</groupId>
             <artifactId>hadoop-bare-naked-local-fs</artifactId>
             <version>${naked-local-fs-version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scalaCompatVersion}</artifactId>
-            <version>${sparkVersion}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
