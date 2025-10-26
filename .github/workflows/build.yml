@@ -20,7 +20,7 @@ jobs:
       testString: test # use tests for verifying only the delta tests have issues testString: test
       theMatrix: |
         {
-          "profile": ["Spark350", "Spark341", "Spark332", "Spark331", "Spark32", "Spark313", "Spark3"],
+          "profile": ["Spark350", "Spark341", "Spark332", "Spark321", "Spark32", "Spark313", "Spark3"],
           "scala": [ "dummy" ]
         }
     secrets: inherit
