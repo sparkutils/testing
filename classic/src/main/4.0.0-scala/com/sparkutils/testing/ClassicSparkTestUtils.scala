@@ -13,5 +13,18 @@ object ClassicSparkTestUtils {
     if (SQLConf.isStaticConfigKey(k)) {
       throw new AnalysisException(s"Cannot modify the value of a static config: $k")
     }
+  import org.apache.spark.sql.execution.SparkPlan
+  import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
+
+  def getCorrectPlan(sparkPlan: SparkPlan): SparkPlan =
+    if (sparkPlan.children.isEmpty)
+      // assume it's AQE
+      sparkPlan match {
+        case aq: AdaptiveSparkPlanExec => aq.initialPlan
+        case _ => sparkPlan
+      }
+    else
+      sparkPlan
+
 
 }

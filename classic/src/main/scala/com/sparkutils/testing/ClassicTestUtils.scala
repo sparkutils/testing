@@ -1,10 +1,10 @@
 package com.sparkutils.testing
 
+import com.sparkutils.testing.ClassicSparkTestUtils.getCorrectPlan
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
-import org.apache.spark.sql.sparkutils.testing.PlanHelper
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -57,7 +57,7 @@ object ClassicTestUtils {
    * @return
    */
   def getPushDowns(sparkPlan: SparkPlan): Seq[Filter] =
-    PlanHelper.getCorrectPlan(sparkPlan).collect {
+    getCorrectPlan(sparkPlan).collect {
       case fs: FileSourceScanExec =>
         import scala.reflect.runtime.{universe => ru}
 
