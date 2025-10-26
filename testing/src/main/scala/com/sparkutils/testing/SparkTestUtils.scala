@@ -21,7 +21,7 @@ object SparkTestUtils {
   def path(suffix: String) = s"${tpath.get}/$suffix"
 
   def resolveBuiltinOrTempFunction(sparkSession: SparkSession)(name: String, exps: Seq[Expression]): Option[Expression] =
-    sparkSession.sessionState.catalog.resolveBuiltinOrTempFunction(name, exps)
+    ClassicSparkTestUtils.resolveBuiltinOrTempFunction(sparkSession)(name, exps)
 
   def getCorrectPlan(sparkPlan: SparkPlan): SparkPlan =
     if (sparkPlan.children.isEmpty)

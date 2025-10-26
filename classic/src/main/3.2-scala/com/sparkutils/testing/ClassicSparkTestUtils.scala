@@ -3,6 +3,7 @@ package com.sparkutils.testing
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.catalyst.FunctionIdentifier
 
 object ClassicSparkTestUtils {
 
