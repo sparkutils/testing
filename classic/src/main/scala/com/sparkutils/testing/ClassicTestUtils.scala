@@ -1,8 +1,7 @@
 package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicSparkTestUtils.getCorrectPlan
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.{Dataset, ShimUtils, SparkSession, classic}
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
@@ -63,14 +62,6 @@ trait ClassicTestUtils extends Serializable {
 }
 
 object ClassicTestUtils {
-
-  def registerFunction(sparkSession: SparkSession): (String, scala.Seq[Expression] => Expression) => Unit = {
-    if (sparkSession.isInstanceOf[classic.SparkSession]) {
-      ShimUtils.registerFunction(sparkSession.sessionState.functionRegistry) _
-    } else {
-      (a,b) => {}
-    }
-  }
 
   /**
    * Gets pushdowns from a dataset
