@@ -75,4 +75,7 @@ object Utils {
    */
   lazy val testClassesPathsConfig: (String, String) = MAIN_CLASSPATH -> testClassPaths.mkString(File.pathSeparatorChar.toString)
 
+  val DEBUG_CONNECT_LOGS_SYS = "spark.debug.sc.jvm.client"
+
+  val useDebugConnectLogs: (String, String) = DEBUG_CONNECT_LOGS_SYS -> "true"
 }

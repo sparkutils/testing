@@ -1,6 +1,5 @@
 package com.sparkutils.testing
 
-import com.sparkutils.shim.expressions.UnresolvedFunction4
 import com.sparkutils.testing.ClassicTestUtils.getPushDowns
 import com.sparkutils.testing.Utils.testClassesPathsConfig
 import com.sparkutils.testing.sessionStrategies.NewSessionEverySuiteWithSharedConnectServer
@@ -60,10 +59,10 @@ class SimpleTests extends FunSuite with SparkTestSuite with NewSessionEverySuite
   } }
 
   test("verify custom expressions") { evalCodeGens{
-    classicOnly {
-      // perform locally for classic, but connect will use the extension
-      ClassicTestUtils.registerFunction(sparkSession)("sparkutils_echo", exps => Echo(exps.head))
-    }
+    // perform locally for classic, but connect client will no-op and the server
+    // will use the extension via sparkConnectServerConfig
+    ShimUtils.registerFunction(sparkSession)("sparkutils_echo", exps => Echo(exps.head))
+
     val s = sparkSession
     import s.implicits._
     sparkSession.sql("select sparkutils_echo(1)").as[Int].collect().head shouldBe 1

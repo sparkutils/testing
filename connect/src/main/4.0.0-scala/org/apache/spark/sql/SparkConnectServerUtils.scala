@@ -17,7 +17,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
-import com.sparkutils.testing.Utils.{MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
+import com.sparkutils.testing.Utils.{DEBUG_CONNECT_LOGS_SYS, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
 import org.apache.spark.SparkBuildInfo
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
@@ -141,11 +141,11 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
       "hive"
     } else {
       // scalastyle:off println
-      println(
+      /*println(
         "Will start Spark Connect server with `spark.sql.catalogImplementation=in-memory`, " +
           "some tests that rely on Hive will be ignored. If you don't want to skip them:\n" +
           "1. Test with maven: run `build/mvn install -DskipTests -Phive` before testing\n" +
-          "2. Test with sbt: run test with `-Phive` profile")
+          "2. Test with sbt: run test with `-Phive` profile")*/
       // scalastyle:on println
       // SPARK-43647: Proactively cleaning the `classes` and `test-classes` dir of hive
       // module to avoid unexpected loading of `DataSourceRegister` in hive module during
@@ -254,13 +254,25 @@ object SparkConnectServerUtils {
 
   def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = Some(
     new ConnectSession {
-      val utils = SparkConnectServerUtils(serverConfig)
+      val filter =
+        serverConfig.get(DEBUG_CONNECT_LOGS_SYS).exists { v =>
+          System.setProperty(DEBUG_CONNECT_LOGS_SYS, v)
+          true
+        }
+
+      val utils = SparkConnectServerUtils(
+        if (filter)
+          serverConfig - DEBUG_CONNECT_LOGS_SYS
+        else
+          serverConfig
+      )
 
       val th = System.getProperty("spark.test.home")
       if (th eq null) {
         System.setProperty("spark.test.home",".")
       }
-      System.setProperty("spark.debug.sc.jvm.client","true")
+
+
       utils.start()
 
       override def sparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
