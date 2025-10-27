@@ -9,7 +9,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, ExprCode}
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnaryExpression}
 import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql.{Column, ShimUtils, SparkSessionExtensions}
+import org.apache.spark.sql.{Column, ShimUtils, SparkSessionExtensions, functions}
 import org.scalatest.{FunSuite, Matchers}
 
 case class Echo(child: Expression) extends UnaryExpression {
@@ -25,7 +25,7 @@ case class Echo(child: Expression) extends UnaryExpression {
 
 object Echo {
   def apply(child: Column): Column =
-    ShimUtils.column(UnresolvedFunction4("sparkutils_echo", Seq(ShimUtils.expression(child)), false))
+    ShimUtils.callFunction("sparkutils_echo", child)
 }
 
 class EchoSparkExtension extends ((SparkSessionExtensions) => Unit) with Logging {
@@ -67,7 +67,9 @@ class SimpleTests extends FunSuite with SparkTestSuite with NewSessionEverySuite
     val s = sparkSession
     import s.implicits._
     sparkSession.sql("select sparkutils_echo(1)").as[Int].collect().head shouldBe 1
+    sparkSession.range(1).select(Echo(functions.col("id"))).as[Long].collect().head shouldBe 0L
   } }
+
 }
 
 object GlobalSession extends SessionsStateHolder {
