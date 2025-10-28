@@ -258,7 +258,7 @@
                 <dbrCompatVersion>4.0.0.oss_</dbrCompatVersion>
                 <scalaVersion>2.13.16</scalaVersion>
                 <scalaCompatVersion>2.13</scalaCompatVersion>
-                <sparkVersion>4.0.0</sparkVersion>
+                <sparkVersion>4.0.1</sparkVersion>
                 <sparkCompatVersion>4.0</sparkCompatVersion>
                 <profileDir>4.0.0</profileDir>
                 <jacksonVersion>2.15.2</jacksonVersion> <!-- scalameter dependency is 2.9.10 so perf tests runs need to change it -->

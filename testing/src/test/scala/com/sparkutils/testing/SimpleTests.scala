@@ -2,7 +2,7 @@ package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicTestUtils.getPushDowns
 import com.sparkutils.testing.Utils.testClassesPathsConfig
-import com.sparkutils.testing.sessionStrategies.NewSessionEverySuiteWithSharedConnectServer
+import com.sparkutils.testing.sessionStrategies.{GlobalSession, NewSessionEverySuiteWithSharedConnectServer}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, ExprCode}
@@ -68,18 +68,5 @@ class SimpleTests extends FunSuite with SparkTestSuite with NewSessionEverySuite
     sparkSession.sql("select sparkutils_echo(1)").as[Int].collect().head shouldBe 1
     sparkSession.range(1).select(Echo(functions.col("id"))).as[Long].collect().head shouldBe 0L
   } }
-
-}
-
-object GlobalSession extends SessionsStateHolder {
-
-  var current: Sessions = _
-
-  override def setSessions(sessions: => Sessions): Unit =
-    if (current eq null) {
-      current = sessions
-    }
-
-  override def getSessions: Sessions = current
 
 }

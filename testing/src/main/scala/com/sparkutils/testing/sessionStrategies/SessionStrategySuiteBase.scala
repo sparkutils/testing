@@ -8,7 +8,7 @@ import org.scalatest.{BeforeAndAfterAll, TestSuite}
  * Implementations can override currentSessionsHolder to choose how to manage the sessions, or the sessions
  * method to change the creation approach
  */
-trait NewSessionEverySuiteBase extends SessionStrategy with BeforeAndAfterAll { self: TestSuite =>
+trait SessionStrategySuiteBase extends SessionStrategy with BeforeAndAfterAll { self: TestSuite =>
 
   protected def currentSessionsHolder: SessionsStateHolder
 
@@ -17,8 +17,12 @@ trait NewSessionEverySuiteBase extends SessionStrategy with BeforeAndAfterAll { 
     sessions
   }
 
+  protected def shouldCallSessionsStop: Boolean = true
+
   override def afterAll(): Unit = {
-    currentSessionsHolder.stop()
+    if (shouldCallSessionsStop) {
+      currentSessionsHolder.stop()
+    }
 
     super.afterAll()
   }

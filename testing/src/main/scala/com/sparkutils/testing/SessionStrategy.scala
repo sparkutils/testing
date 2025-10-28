@@ -59,7 +59,7 @@ trait SessionsStateHolder {
   protected def stopConnectServer: Boolean = true
 
   /**
-   * By default closes all client sessions and connect servers
+   * By default, closes all client sessions and connect servers
    */
   def stop(): Unit =
     if (getSessions ne null) {

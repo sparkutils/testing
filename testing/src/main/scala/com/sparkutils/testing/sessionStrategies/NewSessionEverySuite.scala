@@ -7,7 +7,7 @@ import org.scalatest.{BeforeAndAfterAll, TestSuite}
  * Creates a new set of sessions for every test suite but does not do so when a cluster is detected.
  * Each suite also starts new background Connect servers
  */
-trait NewSessionEverySuite extends NewSessionEverySuiteBase { self: TestSuite =>
+trait NewSessionEverySuite extends SessionStrategySuiteBase { self: TestSuite =>
 
   val ssh =
     new SessionsStateHolder {

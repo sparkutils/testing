@@ -9,7 +9,7 @@ import org.scalatest.TestSuite
  * with the Connect server shared across all invocations, the implementer should use a singleton stateholder but
  * must override stopConnectServer to return false.
  */
-trait NewSessionEverySuiteWithSharedConnectServer extends NewSessionEverySuiteBase {
+trait NewSessionEverySuiteWithSharedConnectServer extends SessionStrategySuiteBase {
   self: TestSuite =>
 
   /**
