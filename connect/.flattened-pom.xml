@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-sql-api_2.13</artifactId>
-      <version>4.0.0</version>
+      <version>4.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>com.sparkutils</groupId>
       <artifactId>shim_compilation_4.0.0.oss_4.0_2.13</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.0-baseline2-SNAPSHOT</version>
       <classifier>sources</classifier>
       <scope>provided</scope>
       <exclusions>
@@ -65,7 +65,7 @@
     <dependency>
       <groupId>com.sparkutils</groupId>
       <artifactId>shim_runtime_4.0.0.oss_4.0_2.13</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.0-baseline2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -92,7 +92,19 @@
       <version>2.13.0</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>15.0</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>central_snaps</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+  </repositories>
   <build>
     <plugins>
       <plugin>
@@ -110,14 +122,32 @@
         <dependency>
           <groupId>org.apache.spark</groupId>
           <artifactId>spark-connect-client-jvm_2.13</artifactId>
-          <version>4.0.0</version>
+          <version>4.0.1</version>
           <classifier>tests</classifier>
           <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.spark</groupId>
           <artifactId>spark-connect_2.13</artifactId>
-          <version>4.0.0</version>
+          <version>4.0.1</version>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>17.3.dbr</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-connect-client-jvm_2.13</artifactId>
+          <version>4.0.1</version>
+          <classifier>tests</classifier>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-connect_2.13</artifactId>
+          <version>4.0.1</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
