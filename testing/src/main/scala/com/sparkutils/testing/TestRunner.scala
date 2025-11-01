@@ -68,8 +68,8 @@ trait TestRunner {
         // ignore
       }
     }
-    val numberOfBatches = numberOfBatches(classargs.size)
-    
+    val numberOfBatchesN = numberOfBatches(classargs.size)
+
     val classargItr = classargs.iterator
     var j = 0
     while (j < (batchStartingNumber * argsPerBatch) && classargItr.hasNext) {
@@ -77,7 +77,7 @@ trait TestRunner {
 
       j += 1
     }
-    for (i <- batchStartingNumber until numberOfBatches) {
+    for (i <- batchStartingNumber until numberOfBatchesN) {
       System.out.println(s"$projectName - starting test batch $i")
       val joined = new Array[String](oargs.size + argsPerBatch)
       oargs.toArray[String](joined)
