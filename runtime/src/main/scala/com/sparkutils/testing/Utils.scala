@@ -22,7 +22,7 @@ object Utils {
     System
       .getProperty("java.class.path")
       .split(File.pathSeparatorChar)
-      .filter { e: String =>
+      .filter { e: String => 
         !e.endsWith(".jar") && (new File(e).isDirectory)
       }
 
