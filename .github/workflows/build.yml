@@ -23,6 +23,7 @@ jobs:
           "profile": ["Spark350", "Spark341", "Spark332", "Spark321", "Spark32", "Spark313", "Spark3"],
           "scala": [ "dummy" ]
         }
+      jdk: 9
     secrets: inherit
 
   test_builds_21:
@@ -51,6 +52,7 @@ jobs:
           "profile": ["12.2.dbr", "13.1.dbr", "13.3.dbr", "14.0.dbr", "14.3.dbr", "15.4.dbr", "16.4.dbr"],
           "scala": [ "dummy" ]
         }
+      jdk: 9
     secrets: inherit
 
   noTest_builds_21:
@@ -79,6 +81,7 @@ jobs:
           "profile": ["Spark350", "Spark341", "Spark332", "Spark321", "Spark32", "Spark313", "Spark3", "12.2.dbr", "13.1.dbr", "13.3.dbr", "14.0.dbr", "14.3.dbr", "15.4.dbr", "16.4.dbr"],
           "scala": [ "dummy" ]
         }
+      jdk: 9
     secrets: inherit
 
   publish_21:
