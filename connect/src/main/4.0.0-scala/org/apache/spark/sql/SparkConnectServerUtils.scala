@@ -93,9 +93,9 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     val command = Seq.newBuilder[String]
     command += s"${System.getProperty("java.home")}/bin/java"
     command ++= jvmOpts
-    val classPath = connectServerJars.mkString(File.pathSeparatorChar.toString)
+    val classPathOriginal = connectServerJars.mkString(File.pathSeparatorChar.toString)
 
-    command += "-classpath" += (classPath + (
+    val classPath = (classPathOriginal + (
       if (classItems.nonEmpty)
         s"${File.pathSeparatorChar}$classItems"
       else
@@ -118,6 +118,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     builder.directory(new File(sparkHome))
     val environment = builder.environment()
     environment.put("SPARK_USER", "test")
+    environment.put("CLASSPATH", classPath)
     environment.remove("SPARK_DIST_CLASSPATH")
     if (isDebug) {
       builder.redirectError(Redirect.INHERIT)

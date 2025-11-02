@@ -29,7 +29,7 @@ trait TestRunner {
   /**
    * Provides -oWDFT by default
    */
-  val scalaTestArgs: Seq[String] =  Seq("-oWDFT")
+  val scalaTestArgs: Seq[String] = Seq("-oWDFT")
 
   def numberOfBatches(numberOfClasses: Int) = numberOfClasses / 2 / 10
   val argsPerBatch = 20
