@@ -22,7 +22,7 @@ object Utils {
     System
       .getProperty("java.class.path")
       .split(File.pathSeparatorChar)
-      .filter { e: String => 
+      .filter { e: String =>
         !e.endsWith(".jar") && (new File(e).isDirectory)
       }
 
@@ -85,4 +85,26 @@ object Utils {
    * Enables debug logging on the spawned connect server, use this when your tests hang or otherwise unexpectedly quit
    */
   val useDebugConnectLogs: (String, String) = DEBUG_CONNECT_LOGS_SYS -> "true"
+
+
+
+  /**
+   * PREFIX configuration item keys with this in order to provide additional JVM options (e.g. -D's or memory settings)
+   */
+  val FLAT_JVM_OPTION: String = "SPAWNED_JVM_OPT_"
+
+  /**
+   * Use with '4g', for example to spawn connect servers of sufficient memory
+   * @param of
+   * @return
+   */
+  def connectMemory(of: String): (String, String) = jvmOpt(("MEMORY" -> ("-Xmx"+of)))
+
+  /**
+   * provide additional jvm options, the name is used to provide a key and is not used on the command line, only the value
+   * @param pair
+   * @return
+   */
+  def jvmOpt(pair: (String, String)) = FLAT_JVM_OPTION+pair._1 -> pair._2
+
 }

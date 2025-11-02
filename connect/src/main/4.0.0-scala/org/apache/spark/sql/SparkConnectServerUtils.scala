@@ -17,7 +17,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
-import com.sparkutils.testing.Utils.{DEBUG_CONNECT_LOGS_SYS, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
+import com.sparkutils.testing.Utils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
 import org.apache.spark.SparkBuildInfo
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
@@ -53,9 +53,18 @@ and custom expression code to be tested.  The server is run directly via java no
 case class SparkConnectServerUtils(config: Map[String, String]) {
 
   private lazy val classItems = config.getOrElse(MAIN_CLASSPATH,"")
-  private lazy val extraMainConfigItems = (config - MAIN_CLASSPATH).map(p => s"-D${p._1}=${p._2}")
+  private lazy val (jvmOptsExtraBase, extraMainConfigItemsBase) =
+    ((config - MAIN_CLASSPATH).filter{
+      p => p._1.startsWith(FLAT_JVM_OPTION)
+    }, (config - MAIN_CLASSPATH).filterNot{
+      p => p._1.startsWith(FLAT_JVM_OPTION)
+    })
+  private lazy val jvmOptsExtra = jvmOptsExtraBase.values
+  private lazy val extraMainConfigItems = extraMainConfigItemsBase.map(p => s"-D${p._1}=${p._2}")
 
   private val jvmOpts = Seq(
+    "-ea",
+    "-XX:+IgnoreUnrecognizedVMOptions",
     "--add-opens=java.base/java.lang=ALL-UNNAMED",
     "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
     "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -68,8 +77,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
     "--add-opens=java.base/sun.nio.cs=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.action=ALL-UNNAMED",
-    "--add-opens=java.base/sun.util.calendar=ALL-UNNAMED",
-    "-XX:+IgnoreUnrecognizedVMOptions"
+    "--add-opens=java.base/sun.util.calendar=ALL-UNNAMED"
   )
 
   // The equivalent command to start the connect server via command line:
@@ -93,6 +101,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
     val command = Seq.newBuilder[String]
     command += s"${System.getProperty("java.home")}/bin/java"
     command ++= jvmOpts
+    command ++= jvmOptsExtra
     val classPathOriginal = connectServerJars.mkString(File.pathSeparatorChar.toString)
 
     val classPath = (classPathOriginal + (
@@ -111,23 +120,27 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
       "-Dspark.master=local[*]",
       "-Dspark.app.name=test"
     )
-    command += "org.apache.spark.sql.connect.service.SparkConnectServer" // "org.apache.spark.sql.connect.SimpleSparkConnectService"
+    command += "org.apache.spark.sql.connect.service.SparkConnectServer"
+      //"org.apache.spark.sql.connect.SimpleSparkConnectService"
 
     // command += connectJar
     val builder = new ProcessBuilder(command.result(): _*)
     builder.directory(new File(sparkHome))
     val environment = builder.environment()
     environment.put("SPARK_USER", "test")
+    environment.put("SPARK_MASTER", "local[*]") // doesn't take it fully via -D
     environment.put("CLASSPATH", classPath)
     environment.remove("SPARK_DIST_CLASSPATH")
     if (isDebug) {
       builder.redirectError(Redirect.INHERIT)
       builder.redirectOutput(Redirect.INHERIT)
+    } else {
+      builder.redirectError(Redirect.DISCARD)
+      builder.redirectOutput(Redirect.DISCARD)
     }
 
     val process = builder.start()
     consoleOut = process.getOutputStream
-
     // Adding JVM shutdown hook
     sys.addShutdownHook(stop())
     process

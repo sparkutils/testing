@@ -280,6 +280,7 @@
                 <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
                 <!-- spark-api is pulled from spark-sql, but for this library we need to use connect-client instead -->
                 <spark.api>spark-sql-api</spark.api>
+                <javaLangVersion>17</javaLangVersion>
             </properties>
 
         </profile>
@@ -467,6 +468,7 @@
 
         <!-- lets the runtime package depend on spark-sql for below 4 -->
         <spark.api>spark-sql</spark.api>
+        <javaLangVersion>8</javaLangVersion>
     </properties>
 
     <repositories>
@@ -529,8 +531,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
-                        <source>17</source>
-                        <target>17</target>
+                        <source>${javaLangVersion}</source>
+                        <target>${javaLangVersion}</target>
                     </configuration>
                 </plugin>
 
@@ -587,6 +589,7 @@
                         </args>
                         <recompileMode>all</recompileMode>
                         <scalaCompatVersion>${scalaCompatVersion}</scalaCompatVersion>
+                        <release>${javaLangVersion}</release>
 
                         <compilerPlugins>
                             <compilerPlugin>

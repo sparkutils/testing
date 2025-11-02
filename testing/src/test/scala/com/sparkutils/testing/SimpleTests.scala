@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicTestUtils.getPushDowns
-import com.sparkutils.testing.Utils.testClassesPathsConfig
+import com.sparkutils.testing.Utils.{connectMemory, testClassesPathsConfig, useDebugConnectLogs}
 import com.sparkutils.testing.sessionStrategies.{GlobalSession, NewSessionEverySuiteWithSharedConnectServer}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
@@ -43,7 +43,8 @@ class SimpleTests extends FunSuite with SparkTestSuite with NewSessionEverySuite
   // force through the test class paths AND spark extension
   override def sparkConnectServerConfig(): Map[String, String] =
     super.sparkConnectServerConfig() + testClassesPathsConfig +
-      (("spark.sql.extensions", classOf[EchoSparkExtension].getName))
+      (("spark.sql.extensions", classOf[EchoSparkExtension].getName)) + //useDebugConnectLogs +
+      connectMemory("4g")
 
   test("verify simple queries work") {
     val s = sparkSession
@@ -52,11 +53,17 @@ class SimpleTests extends FunSuite with SparkTestSuite with NewSessionEverySuite
   }
 
   test("verify pushdowns") { classicOnly {
-    sparkSession.range(100).write.parquet(outputDir + "/ids")
+    sparkSession.range(100).write.mode("overwrite").parquet(outputDir + "/ids")
     val df = sparkSession.read.parquet(outputDir + "/ids").filter("id < 40")
     val pushdowns = getPushDowns( df )
     pushdowns.nonEmpty shouldBe true
   } }
+
+  test("verify large datasets") {
+    sparkSession.range(10000).write.mode("overwrite").parquet(outputDir + "/ids")
+    val df = sparkSession.read.parquet(outputDir + "/ids").filter("id < 400")
+    df.count
+  }
 
   test("verify custom expressions") { evalCodeGens{
     // perform locally for classic, but connect client will no-op and the server
