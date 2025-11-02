@@ -281,6 +281,7 @@
                 <!-- spark-api is pulled from spark-sql, but for this library we need to use connect-client instead -->
                 <spark.api>spark-sql-api</spark.api>
                 <javaLangVersion>17</javaLangVersion>
+                <javaLangScalacFlag>-release</javaLangScalacFlag>
             </properties>
 
         </profile>
@@ -468,7 +469,8 @@
 
         <!-- lets the runtime package depend on spark-sql for below 4 -->
         <spark.api>spark-sql</spark.api>
-        <javaLangVersion>8</javaLangVersion>
+        <javaLangVersion></javaLangVersion>
+        <javaLangScalacFlag></javaLangScalacFlag>
     </properties>
 
     <repositories>
@@ -586,10 +588,11 @@
                             <arg>${scalacArg1}</arg>
                             <arg>${scalacArg2}</arg>
                             <arg>-nobootcp</arg>
+                            <arg>${javaLangScalacFlag}</arg>
+                            <arg>${javaLangVersion}</arg>
                         </args>
                         <recompileMode>all</recompileMode>
                         <scalaCompatVersion>${scalaCompatVersion}</scalaCompatVersion>
-                        <release>${javaLangVersion}</release>
 
                         <compilerPlugins>
                             <compilerPlugin>
