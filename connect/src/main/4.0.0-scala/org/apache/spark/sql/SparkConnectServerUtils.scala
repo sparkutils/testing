@@ -18,7 +18,7 @@ package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
 import com.sparkutils.testing.Utils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
-import org.apache.spark.SparkBuildInfo
+import org.apache.spark.{SparkBuildInfo, sql}
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
 import org.apache.spark.sql.connect.common.config.ConnectCommon
@@ -289,9 +289,20 @@ object SparkConnectServerUtils {
 
       utils.start()
 
-      override def sparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
+      private def createSparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
+
+      private var _sparkSession: SparkSession = createSparkSession
+
+      override def sparkSession: sql.SparkSession = _sparkSession
 
       override def stopServer(): Unit = utils.stop()
+
+      override def resetSession(): Unit = {
+        if (sparkSession.isUsable) {
+          sparkSession.stop()
+        }
+        _sparkSession = createSparkSession
+      }
     }
   )
 }

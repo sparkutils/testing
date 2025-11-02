@@ -23,7 +23,10 @@ trait NewSessionEverySuiteWithSharedConnectServer extends SessionStrategySuiteBa
         createSparkSessions(connectionType)
       else
         // re-use the current connect server, but create a fresh classic spark session
-        cur.connect.map(cs => createSparkSessions(ClassicOnly).copy(connect = Some(cs))).getOrElse(
+        cur.connect.map(cs => createSparkSessions(ClassicOnly).copy(connect = {
+          cs.resetSession()
+          Some(cs)
+        })).getOrElse(
           createSparkSessions(connectionType)
         )
     )

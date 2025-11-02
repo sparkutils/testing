@@ -1,5 +1,7 @@
 package com.sparkutils.testing
 
+import com.sparkutils.testing.SparkTestWrapper.{callingTestInClassic, callingTestInConnect}
+import org.apache.spark.sql.SparkSession
 import org.scalatest.{Outcome, TestSuite}
 
 /**
@@ -19,6 +21,60 @@ trait SparkTestSuite extends TestUtils with TestSuite with ShouldRunWithoutSpark
       this: TestUtils with SessionStrategy with ShouldRunWithoutSparkConnect { type TestType = NoArgTest })()
   }
 
+  /**
+   * When a classic is available it sets it as the active session
+   * @param f
+   * @tparam T
+   */
+  def withClassicAsActive(f: => Unit): Unit = {
+    var active: Option[SparkSession] = None
+    try {
+      active = SparkSession.getActiveSession
+
+      val sess = sessions
+
+      sess.classic.foreach { s =>
+        inConnect.set(false)
+        SparkSession.setActiveSession(s)
+
+        f
+      }
+    } finally {
+      active.foreach( s => SparkSession.setActiveSession(s) )
+    }
+  }
+
+  /**
+   * Calls this function for each session, resetting the active session to the previous version, ideal for teardown functions
+   * @param f
+   */
+  def forEachSession( f: SparkSession => Unit): Unit = {
+    // simple visual markers in stack trace, can evolve better errors later
+    def callingInClassic(s: SparkSession): Unit = f(s)
+    def callingInConnect(s: SparkSession): Unit = f(s)
+
+    val sess = sessions
+
+    var active: Option[SparkSession] = None
+    try {
+      active = SparkSession.getActiveSession
+      sess.classic.foreach { s =>
+        inConnect.set(false)
+        SparkSession.setActiveSession(s)
+
+        callingInClassic(s)
+      }
+
+      sess.connect.foreach { s =>
+        inConnect.set(true)
+        SparkSession.setActiveSession(s.sparkSession)
+
+        callingInConnect(s.sparkSession)
+      }
+    } finally {
+      active.foreach( s => SparkSession.setActiveSession(s) )
+    }
+  }
 }
 
 object SparkTestWrapper {
@@ -32,14 +88,18 @@ object SparkTestWrapper {
 
     cleanupOutput()
 
-    val classic = sessions.classic.map{ s =>
+    val sess = sessions
+
+    val classic = sess.classic.map{ s =>
       inConnect.set(false)
+      SparkSession.setActiveSession(s)
 
       callingTestInClassic(testFunction)(test)
     }
 
-    if (classic.isEmpty || (isSucceeded(classic.get) && sessions.connect.isDefined && !disableSparkConnect(test))) {
+    if (classic.isEmpty || (isSucceeded(classic.get) && sess.connect.isDefined && !disableSparkConnect(test))) {
       inConnect.set(true)
+      SparkSession.setActiveSession(sess.connect.get.sparkSession)
 
       callingTestInConnect(testFunction)(test)
     } else

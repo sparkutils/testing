@@ -18,7 +18,16 @@ trait ConnectUtils extends SparkConnectConfig {
 }
 
 trait ConnectSession {
+  /**
+   *
+   * @return The current SparkSession
+   */
   def sparkSession: SparkSession
+
+  /**
+   * creates a new SparkSession, the pre-existing session will be stopped.
+   */
+  def resetSession(): Unit
 
   def stopServer(): Unit
 }
