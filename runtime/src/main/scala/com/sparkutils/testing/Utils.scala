@@ -22,9 +22,8 @@ object Utils {
     System
       .getProperty("java.class.path")
       .split(File.pathSeparatorChar)
-      .filterNot { e: String =>
-        val fileName = e.substring(e.lastIndexOf(File.separatorChar) + 1)
-        fileName.endsWith(".jar") && (new File(fileName).isDirectory)
+      .filter { e: String =>
+        !e.endsWith(".jar") && (new File(e).isDirectory)
       }
 
   /**
@@ -35,8 +34,7 @@ object Utils {
       .getProperty("java.class.path")
       .split(File.pathSeparatorChar)
       .filter { e: String =>
-        val fileName = e.substring(e.lastIndexOf(File.separatorChar) + 1)
-        fileName.endsWith(".jar")
+        e.endsWith(".jar")
       }
 
   /**
@@ -48,14 +46,14 @@ object Utils {
   /**
    * /test-classes directories
    */
-  lazy val testClassPaths: Seq[String] = classPathDirs.filter(_.endsWith("test-classes"))
+  lazy val testClassPaths: Seq[String] = classPathDirs.filter(p => p.substring(p.lastIndexOf(File.separatorChar) + 1) == "test-classes")
 
   // TODO [test] resources
 
   /**
    * /classes directories
    */
-  lazy val mainClassPaths: Seq[String] = classPathDirs.filterNot(_.endsWith("classes"))
+  lazy val mainClassPaths: Seq[String] = classPathDirs.filter(p => p.substring(p.lastIndexOf(File.separatorChar) + 1) == "classes")
 
   /**
    * This value signifies the main classpath to use for a connect server, note it will be filtered out of the config
@@ -75,7 +73,16 @@ object Utils {
    */
   lazy val testClassesPathsConfig: (String, String) = MAIN_CLASSPATH -> testClassPaths.mkString(File.pathSeparatorChar.toString)
 
+  /**
+   * Use this configuration to add both your test and main classes to connect servers, for example custom query plans or
+   * expressions in your test classes
+   */
+  lazy val fullClassPathConfig: (String, String) = MAIN_CLASSPATH -> (mainClassPaths ++ testClassPaths).mkString(File.pathSeparatorChar.toString)
+
   val DEBUG_CONNECT_LOGS_SYS = "spark.debug.sc.jvm.client"
 
+  /**
+   * Enables debug logging on the spawned connect server, use this when your tests hang or otherwise unexpectedly quit
+   */
   val useDebugConnectLogs: (String, String) = DEBUG_CONNECT_LOGS_SYS -> "true"
 }

@@ -25,12 +25,11 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
    * returns the current sparkSession, when connect is enabled AND the active session it returns a connect SparkSession, otherwise classic
    * @return
    */
-  def sparkSession: SparkSession = {
-    if (inConnect.get()) {
+  def sparkSession: SparkSession =
+    if (inConnect.get())
       sessions.connect.map(_.sparkSession).orElse(sessions.classic).getOrElse(throw new IllegalStateException("At least one SparkSession must be enabled"))
-    } else
+    else
       sessions.classic.getOrElse(throw new IllegalStateException("At least one SparkSession must be enabled"))
-  }
 
   /**
    * Simple time capture, use currentTimeMillis as a start, over a minute gets wrapped to minutes in the returned string
