@@ -1,6 +1,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
+import org.apache.spark.sql
 import org.apache.spark.sql.connect.SparkSession
 
 object SparkConnectServerUtils {
@@ -11,9 +12,16 @@ object SparkConnectServerUtils {
    */
   def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] =
     Some(new ConnectSession {
-      def sparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
+
+      private def createSparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
+
+      private var _sparkSession: SparkSession = createSparkSession
+
+      override def sparkSession: sql.SparkSession = _sparkSession
 
       def stopServer(): Unit = {}
+
+      override def resetSession(): Unit = {}
     })
 
 }
