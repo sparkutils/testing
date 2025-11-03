@@ -14,9 +14,10 @@ trait SparkTestSuite extends TestUtils with TestSuite with ShouldRunWithoutSpark
   override def disableSparkConnect(test: NoArgTest): Boolean =
     test.tags.contains(NoSparkConnect.name)
 
-  override def withFixture(test: NoArgTest): org.scalatest.Outcome = {
-    sessions // called for side effect so logging works
+  protected lazy val forceLoad: Sessions = sessions // called for side effect so logging works
 
+  override def withFixture(test: NoArgTest): org.scalatest.Outcome = {
+    forceLoad
     SparkTestWrapper.wrap(super.withFixture)(_.isSucceeded)(test,
       this: TestUtils with SessionStrategy with ShouldRunWithoutSparkConnect { type TestType = NoArgTest })()
   }
