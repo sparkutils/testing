@@ -89,6 +89,12 @@ object ClassicTestUtils {
         res
     }.flatten.toIndexedSeq
 
+  /**
+   * Returns the correct executed plan from this dataset.
+   * This is appropriate to chain with getPushDowns if running on both connect and classic
+   * @param dataset
+   * @return None if running on connect
+   */
   def getExecutedPlan(dataset: Dataset[_]): Option[SparkPlan] =
     dataset match {
       case d: classic.Dataset[_] =>
