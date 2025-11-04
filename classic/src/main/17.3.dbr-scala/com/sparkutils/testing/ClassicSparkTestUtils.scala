@@ -1,6 +1,6 @@
 package com.sparkutils.testing
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Dataset, SparkSession, classic}
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.internal.SQLConf
 
@@ -27,5 +27,18 @@ object ClassicSparkTestUtils {
     else
       sparkPlan
 
+
+  /**
+   * Returns the correct executed plan from this dataset.
+   * This is appropriate to chain with getPushDowns if running on both connect and classic
+   * @param dataset
+   * @return None if running on connect
+   */
+  def getExecutedPlan(dataset: Dataset[_]): Option[SparkPlan] =
+    dataset match {
+      case d: classic.Dataset[_] =>
+        Some(getCorrectPlan(d.queryExecution.executedPlan))
+      case _ => None
+    }
 
 }
