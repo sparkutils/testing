@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicSparkTestUtils.getCorrectPlan
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, SparkSession, classic}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{FileSourceScanExec, SparkPlan}
 import org.apache.spark.sql.sources.Filter
@@ -88,5 +88,12 @@ object ClassicTestUtils {
 
         res
     }.flatten.toIndexedSeq
+
+  def getExecutedPlan(dataset: Dataset[_]): Option[SparkPlan] =
+    dataset match {
+      case d: classic.Dataset[_] =>
+        Some(getCorrectPlan(d.queryExecution.executedPlan))
+      case _ => None
+    }
 
 }
