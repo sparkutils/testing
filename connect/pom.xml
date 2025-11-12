@@ -93,12 +93,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sparkutils</groupId>
-            <artifactId>hadoop-bare-naked-local-fs</artifactId>
-            <version>${naked-local-fs-version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scalaVersion}</version>
