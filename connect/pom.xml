@@ -93,7 +93,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.globalmentor</groupId>
+            <groupId>com.sparkutils</groupId>
             <artifactId>hadoop-bare-naked-local-fs</artifactId>
             <version>${naked-local-fs-version}</version>
         </dependency>
