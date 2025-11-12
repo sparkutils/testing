@@ -2,6 +2,7 @@ package com.sparkutils.testing
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
 import com.sparkutils.testing.Utils.{booleanEnv, classPathJars}
+import org.apache.hadoop.fs.local.BareStreamingLocalFileSystem
 import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.SparkSession
@@ -59,6 +60,10 @@ trait ClassicUtils extends SparkClassicConfig with ClassicTestUtils {
       Some(("spark.master", s"local[$classicHostMode]")),
       if (System.getProperty("os.name").startsWith("Windows"))
         Some(("spark.hadoop.fs.file.impl", classOf[BareLocalFileSystem].getName))
+      else
+        None,
+      if (System.getProperty("os.name").startsWith("Windows")) // Delta and Structured Streaming
+        Some(("spark.hadoop.fs.AbstractFileSystem.file.impl", classOf[BareStreamingLocalFileSystem].getName))
       else
         None,
       if (excludeFilters)
