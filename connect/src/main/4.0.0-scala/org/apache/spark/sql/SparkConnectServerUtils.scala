@@ -283,7 +283,8 @@ object SparkConnectServerUtils {
 
       val th = System.getProperty("spark.test.home")
       if (th eq null) {
-        System.setProperty("spark.test.home",".")
+        new File("./testing_connect_tmp").mkdirs()
+        System.setProperty("spark.test.home","./testing_connect_tmp")
       }
 
 
