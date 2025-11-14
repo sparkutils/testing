@@ -69,9 +69,9 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.globalmentor</groupId>
+      <groupId>com.sparkutils</groupId>
       <artifactId>hadoop-bare-naked-local-fs</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

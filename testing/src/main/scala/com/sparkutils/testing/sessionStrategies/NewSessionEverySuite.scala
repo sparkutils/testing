@@ -14,7 +14,7 @@ trait NewSessionEverySuite extends SessionStrategySuiteBase { self: TestSuite =>
       var cur: Sessions = _
       override def setSessions(sessions: => Sessions): Unit = {
         if (cur ne null) {
-          cur.stop
+          cur.stop(runWith)
           cur.connect.foreach(_.stopServer())
         }
         cur = sessions

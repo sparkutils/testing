@@ -56,6 +56,11 @@ object Utils {
   lazy val mainClassPaths: Seq[String] = classPathDirs.filter(p => p.substring(p.lastIndexOf(File.separatorChar) + 1) == "classes")
 
   /**
+   * /scoverage-classes directories
+   */
+  lazy val scoverageClassPaths: Seq[String] = classPathDirs.filter(p => p.substring(p.lastIndexOf(File.separatorChar) + 1) == "scoverage-classes")
+
+  /**
    * This value signifies the main classpath to use for a connect server, note it will be filtered out of the config
    * map that is generally applied and used to set the classpath for the spawned jvm.
    */
@@ -66,6 +71,12 @@ object Utils {
    * expressions
    */
   lazy val mainClassPathsConfig: (String, String) = MAIN_CLASSPATH -> mainClassPaths.mkString(File.pathSeparatorChar.toString)
+
+  /**
+   * Use this configuration to add scoverage instrumented main classes, falling back to main classes, to connect servers, for example custom query plans or
+   * expressions
+   */
+  lazy val scoverageClassPathsConfig: (String, String) = MAIN_CLASSPATH -> (scoverageClassPaths ++ mainClassPaths).mkString(File.pathSeparatorChar.toString)
 
   /**
    * Use this configuration to add your test classes to connect servers, for example custom query plans or
