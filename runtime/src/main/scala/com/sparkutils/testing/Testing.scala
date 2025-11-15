@@ -13,24 +13,14 @@ object Testing {
   private val testingFlag = new AtomicBoolean(false)
 
   /**
-   * Should not be used by users but currently (0.0.2) only forces re-evaluation of the quality.lambdaHandlers configuration rather than caching once.
+   * Called by TestUtils
    */
-  protected[sparkutils] def setTesting() = {
+  protected[testing] def setTesting() = {
     testingFlag.set(true)
   }
 
   def testing: Boolean = testingFlag.get
 
-  /**
-   * Should not be called by users of the library and is provided for testing support only
-   * @param thunk
-   */
-  protected[sparkutils] def test(thunk: => Unit): Unit = try {
-    setTesting()
-    thunk
-  } finally {
-    testingFlag.set(false)
-  }
 }
 
 /**
