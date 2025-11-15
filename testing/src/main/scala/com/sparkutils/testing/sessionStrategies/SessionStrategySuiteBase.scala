@@ -43,7 +43,7 @@ trait SessionStrategySuiteBase extends SessionStrategy with BeforeAndAfterAll { 
       // leave the connect stack alone
       val current = currentSessionsHolder.getSessions
 
-      current.classic.asInstanceOf[org.apache.spark.sql.classic.SparkSession].sharedState..globalTempDB
+      //current.classic.asInstanceOf[org.apache.spark.sql.classic.SparkSession].sharedState..globalTempDB
       currentSessionsHolder.swapSession(runWith, {
         val classic = createSparkSessions(ClassicOnly)
         current.copy(classic = classic.classic)
