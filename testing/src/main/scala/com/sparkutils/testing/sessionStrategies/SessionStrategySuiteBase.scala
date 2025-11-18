@@ -1,6 +1,6 @@
 package com.sparkutils.testing.sessionStrategies
 
-import com.sparkutils.testing.{ClassicOnly, ConnectOnly, ConnectionType, SessionStrategy, Sessions, SessionsStateHolder, UseBoth}
+import com.sparkutils.testing.{ClassicOnly, ConnectOnly, SessionStrategy, Sessions, SessionsStateHolder, UseBoth}
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 
 /**
@@ -42,8 +42,6 @@ trait SessionStrategySuiteBase extends SessionStrategy with BeforeAndAfterAll { 
     case ClassicOnly =>
       // leave the connect stack alone
       val current = currentSessionsHolder.getSessions
-
-      //current.classic.asInstanceOf[org.apache.spark.sql.classic.SparkSession].sharedState..globalTempDB
       currentSessionsHolder.swapSession(runWith, {
         val classic = createSparkSessions(ClassicOnly)
         current.copy(classic = classic.classic)
