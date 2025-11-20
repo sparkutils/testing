@@ -162,8 +162,7 @@ object TestUtils {
       else
         false
 
-  /**
-   * If setShouldDebugLog is true run the thunk
+  /**   * If setShouldDebugLog is true run the thunk
    * @param thunk
    */
   def debug(thunk: => Unit): Unit =

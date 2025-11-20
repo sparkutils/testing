@@ -47,7 +47,7 @@ trait TestRunner {
   @throws[IOException]
   def testViaClassLoader(args: Array[String], batchStartingNumber: Int): Unit = {
     val oargs = new util.ArrayList[String]
-    scalaTestArgs.foreach(oargs + _)
+    scalaTestArgs.foreach(oargs.add)
 
     for (i <- 0 until args.length) {
       oargs.add(args(i))
