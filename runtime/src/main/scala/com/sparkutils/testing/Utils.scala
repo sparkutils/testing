@@ -5,15 +5,18 @@ import scala.util.Try
 
 object Utils {
 
-  def booleanEnv(env: String): Boolean = {
-    val tmp = System.getenv(env)
-    if (tmp eq null)
-      false
+  def parseBoolean(s: String): Option[Boolean] =
+    if (s eq null)
+      None
     else
       Try {
-        tmp.toBoolean
-      }.getOrElse(false)
-  }
+        Some(s.toBoolean)
+      }.getOrElse(None)
+
+  def booleanEnvOrProp(env: String): Boolean =
+    parseBoolean( System.getenv(env) ).orElse(
+      parseBoolean( System.getProperty(env) )
+    ).getOrElse(false)
 
   /**
    * All non jars on the classpath

@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
-import com.sparkutils.testing.Utils.{booleanEnv, classPathJars}
+import com.sparkutils.testing.Utils.{booleanEnvOrProp, classPathJars}
 import org.apache.hadoop.fs.local.BareStreamingLocalFileSystem
 import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
@@ -13,7 +13,7 @@ import org.apache.spark.sql.SparkSession
  */
 trait ClassicUtils extends SparkClassicConfig with ClassicTestUtils {
 
-  val disableClassicTesting = booleanEnv("SPARKUTILS_DISABLE_CLASSIC_TESTS")
+  val disableClassicTesting = booleanEnvOrProp("SPARKUTILS_DISABLE_CLASSIC_TESTS")
 
   val classicHostMode = {
     val tmp = System.getenv("SPARKUTILS_SPARK_HOSTS")
