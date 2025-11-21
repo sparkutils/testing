@@ -196,7 +196,7 @@ object TestUtilsEnvironment {
   private var shouldRunClusterTestsV = true
 
   /** allow test usage on non-build environments */
-  def setshouldRunClusterTests(shouldClose: Boolean): Unit = {
+  def setShouldRunClusterTests(shouldClose: Boolean): Unit = {
     this.shouldRunClusterTestsV = shouldClose
     shouldRunClusterTestsWasSet = true
   }
@@ -217,13 +217,13 @@ object TestUtilsEnvironment {
   /**
    * Only called from with in the test suite assume if the original values are not per default then they have been
    * set that way.
-   * If shouldCloseSession is false and debug logging was not explicitly enabled then debug logging is disabled (protecting against any accidental defaulting of true).
+   * If setShouldRunClusterTests is false and debug logging was not explicitly enabled then debug logging is disabled (protecting against any accidental defaulting of true).
    * @param sparkSession if null it's assumed to be running locally, defaults win
    */
   def setupDefaults(sparkSession: SparkSession): Unit =
     if (sparkSession ne null) {
       if (!shouldRunClusterTestsWasSet) {
-        setshouldRunClusterTests( isLocal(sparkSession) && !(onDatabricksFS || onFabricOrSynapse(sparkSession)) )
+        setShouldRunClusterTests( isLocal(sparkSession) && !(onDatabricksFS || onFabricOrSynapse(sparkSession)) )
       }
       if (!shouldDebugLogWasSet) {
         if (!shouldRunClusterTestsV) {

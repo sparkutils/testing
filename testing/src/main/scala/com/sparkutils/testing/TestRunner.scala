@@ -88,7 +88,7 @@ trait TestRunner {
         j += 1
       }
       org.scalatest.tools.Runner.run(joined)
-      System.out.println(s"projectName - gc'ing after finishing test batch $i")
+      System.out.println(s"$projectName - gc'ing after finishing test batch $i")
       System.gc()
       System.gc()
     }
