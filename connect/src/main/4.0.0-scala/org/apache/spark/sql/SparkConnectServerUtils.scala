@@ -17,7 +17,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
-import com.sparkutils.testing.Utils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
+import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
 import org.apache.spark.{SparkBuildInfo, sql}
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}

@@ -1,9 +1,10 @@
 package com.sparkutils.testing
 
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 import scala.util.Try
 
-object Utils {
+object SparkTestUtils {
 
   def parseBoolean(s: String): Option[Boolean] =
     if (s eq null)
@@ -120,5 +121,40 @@ object Utils {
    * @return
    */
   def jvmOpt(pair: (String, String)) = FLAT_JVM_OPTION+pair._1 -> pair._2
+
+  private var _runtimeConnectClientConfig = new AtomicReference[Map[String,String]](Map.empty)
+
+  def setRuntimeConnectClientConfig(config: Map[String, String]): Unit = {
+    _runtimeConnectClientConfig.set(config)
+  }
+
+  /**
+   * Used by ConnectUtils.connectSparkSession, be sure to call setRuntimeConnectClientConfig before running tests
+   */
+  lazy val runtimeConnectClientConfig: Map[String, String] = _runtimeConnectClientConfig.get()
+
+  private var _runtimeClassicConfig = new AtomicReference[Map[String,String]](Map.empty)
+
+  def setRuntimeClassicConfig(config: Map[String, String]): Unit = {
+    _runtimeClassicConfig.set(config)
+  }
+
+  /**
+   * Used by ClassicUtils.classicSparkSession, be sure to call setRuntimeClassicConfig before running tests
+   */
+  lazy val runtimeClassicConfig: Map[String, String] = _runtimeClassicConfig.get()
+
+
+
+  protected var tpath = new AtomicReference[String]("./target/testData")
+
+  def ouputDir = tpath.get
+
+
+  def setPath(newPath: String) = {
+    tpath.set(newPath)
+  }
+
+  def path(suffix: String) = s"${tpath.get}/$suffix"
 
 }

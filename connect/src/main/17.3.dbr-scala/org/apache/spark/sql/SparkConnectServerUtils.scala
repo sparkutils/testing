@@ -13,7 +13,8 @@ object SparkConnectServerUtils {
   def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] =
     Some(new ConnectSession {
 
-      private def createSparkSession: SparkSession = SparkSession.builder.config("spark.api.mode", "connect").getOrCreate()
+      private def createSparkSession: SparkSession = SparkSession.builder.
+        config(clientConfig).config("spark.api.mode", "connect").getOrCreate()
 
       private var _sparkSession: SparkSession = createSparkSession
 

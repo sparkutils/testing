@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.sparkutils.testing.ClassicTestUtils.getPushDowns
-import com.sparkutils.testing.Utils.{connectMemory, testClassesPathsConfig, useDebugConnectLogs}
+import com.sparkutils.testing.SparkTestUtils.{connectMemory, testClassesPathsConfig, useDebugConnectLogs}
 import com.sparkutils.testing.sessionStrategies.{GlobalSession, NewSessionEverySuiteWithSharedConnectServer}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow

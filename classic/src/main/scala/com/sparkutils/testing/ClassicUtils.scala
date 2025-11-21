@@ -1,7 +1,7 @@
 package com.sparkutils.testing
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
-import com.sparkutils.testing.Utils.{booleanEnvOrProp, classPathJars}
+import com.sparkutils.testing.SparkTestUtils.{booleanEnvOrProp, classPathJars, runtimeClassicConfig}
 import org.apache.hadoop.fs.local.BareStreamingLocalFileSystem
 import org.apache.spark.sql.catalyst.expressions.CodegenObjectFactoryMode
 import org.apache.spark.sql.internal.SQLConf
@@ -32,6 +32,11 @@ trait ClassicUtils extends SparkClassicConfig with ClassicTestUtils {
 
   def loggingLevel: String = "ERROR"
 
+  /**
+   * Creates a classic SparkSession using the sparkClassicConfig and runtime Utils.runtimeClassicConfig, use setRuntime
+   * ClassicConfig in order to set azure fs keys etc.
+   * @return
+   */
   def classicSparkSession: Option[SparkSession] =
     if (disableClassicTesting)
       None
@@ -47,6 +52,7 @@ trait ClassicUtils extends SparkClassicConfig with ClassicTestUtils {
         // only a visual change
         // sparkSession.conf.set("spark.sql.legacy.castComplexTypesToString.enabled", true)
         sparkSession.sparkContext.setLogLevel(loggingLevel) // set to debug to get actual code lines etc.
+        runtimeClassicConfig.foreach(p => sparkSession.conf.set(p._1, p._2))
         sparkSession
       }
 
