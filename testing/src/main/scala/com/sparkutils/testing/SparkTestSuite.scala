@@ -17,7 +17,7 @@ trait SparkTestSuite extends TestUtils with TestSuite with ShouldRunWithoutSpark
 
   override def withFixture(test: NoArgTest): org.scalatest.Outcome = {
     forceLoad
-    SparkTestWrapper.wrap(super.withFixture)(_.isSucceeded)(test,
+    SparkTestWrapper.wrap(super.withFixture)(_.isSucceeded)(org.scalatest.Succeeded)(test,
       this: TestUtils with SessionStrategy with ShouldRunWithoutSparkConnect { type TestType = NoArgTest })()
   }
 
@@ -112,7 +112,7 @@ object SparkTestWrapper {
   private def callingTestInClassic[T,R](testFunction: T => R)(t: T): R = testFunction(t)
   private def callingTestInConnect[T,R](testFunction: T => R)(t: T): R = testFunction(t)
 
-  def wrap[T,R](testFunction: T => R)(isSucceeded: R => Boolean)(test: T, testUtils: TestUtils with SessionStrategy with ShouldRunWithoutSparkConnect { type TestType = T })(printF: String => Unit = print): R = {
+  def wrap[T,R](testFunction: T => R)(isSucceeded: R => Boolean)(skipped: R)(test: T, testUtils: TestUtils with SessionStrategy with ShouldRunWithoutSparkConnect { type TestType = T })(printF: String => Unit = print): R = {
     import testUtils._
 
     testUtils.verifyRunWith()
@@ -140,7 +140,8 @@ object SparkTestWrapper {
 
           callingTestInConnect(testFunction)(test)
         case _ if classic.isDefined => classic.get
-        case _ => sys.error(s"Testing TestSuite has runWith ClassicOnly, but classic session exists")
+        case _ if !testUtils.disableClassicTesting => sys.error(s"Testing TestSuite has runWith ClassicOnly, but no classic session exists despite not being disabled")
+        case _ => skipped
       }
     } else
       classic.get
