@@ -47,7 +47,7 @@ trait SparkTestSuite extends TestUtils with TestSuite with ShouldRunWithoutSpark
    * @tparam T
    */
   def withClassicAsActive(sessions: Sessions, f: => Unit): Unit = {
-    if (sessions.classic.isEmpty) {
+    if (sessions.classic.isEmpty && !disableClassicTesting) {
       sys.error("withClassicAsActive called but there is no classic session")
     }
 
