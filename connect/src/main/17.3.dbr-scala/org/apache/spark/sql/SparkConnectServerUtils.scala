@@ -13,8 +13,13 @@ object SparkConnectServerUtils {
   def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] =
     Some(new ConnectSession {
 
-      private def createSparkSession: SparkSession = SparkSession.builder.
-        config(clientConfig).config("spark.api.mode", "connect").getOrCreate()
+      private def createSparkSession: SparkSession =
+        SparkSession.getActiveSession.getOrElse {
+          // check getOrElse to stop warn:
+          // 25/12/05 11:56:55 WARN SparkSession: spark.api.mode configuration is not supported in Connect mode.
+          SparkSession.builder.
+            config(clientConfig).config("spark.api.mode", "connect").getOrCreate()
+        }
 
       private var _sparkSession: SparkSession = createSparkSession
 

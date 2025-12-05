@@ -1,5 +1,7 @@
 package com.sparkutils.testing
 
+import org.apache.spark.sql.SparkSession
+
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.Try
@@ -14,10 +16,21 @@ object SparkTestUtils {
         Some(s.toBoolean)
       }.getOrElse(None)
 
-  def booleanEnvOrProp(env: String): Boolean =
+  def booleanEnvOrProp(env: String, default: Boolean = false): Boolean =
     parseBoolean( System.getenv(env) ).orElse(
       parseBoolean( System.getProperty(env) )
-    ).getOrElse(false)
+    ).getOrElse(default)
+
+  /**
+   * If there is a sparkSession already _and_ it's connect - then default to true, otherwise false.
+   *
+   * The environment or System.property SPARKUTILS_DISABLE_CLASSIC_TESTS can override the default
+   */
+  val disableClassicTesting: Boolean = booleanEnvOrProp("SPARKUTILS_DISABLE_CLASSIC_TESTS",
+    SparkSession.getActiveSession.exists { s =>
+      s.getClass.getName == "org.apache.spark.sql.connect.SparkSession"
+    }
+  )
 
   /**
    * All non jars on the classpath
@@ -122,7 +135,7 @@ object SparkTestUtils {
    */
   def jvmOpt(pair: (String, String)) = FLAT_JVM_OPTION+pair._1 -> pair._2
 
-  private var _runtimeConnectClientConfig = new AtomicReference[Map[String,String]](Map.empty)
+  private val _runtimeConnectClientConfig = new AtomicReference[Map[String,String]](Map.empty)
 
   def setRuntimeConnectClientConfig(config: Map[String, String]): Unit = {
     _runtimeConnectClientConfig.set(config)
@@ -133,7 +146,7 @@ object SparkTestUtils {
    */
   lazy val runtimeConnectClientConfig: Map[String, String] = _runtimeConnectClientConfig.get()
 
-  private var _runtimeClassicConfig = new AtomicReference[Map[String,String]](Map.empty)
+  private val _runtimeClassicConfig = new AtomicReference[Map[String,String]](Map.empty)
 
   def setRuntimeClassicConfig(config: Map[String, String]): Unit = {
     _runtimeClassicConfig.set(config)
@@ -146,7 +159,7 @@ object SparkTestUtils {
 
 
 
-  protected var tpath = new AtomicReference[String]("./target/testData")
+  protected val tpath = new AtomicReference[String]("./target/testData")
 
   def ouputDir = tpath.get
 

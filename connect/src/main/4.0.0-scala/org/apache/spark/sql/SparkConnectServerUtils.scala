@@ -18,6 +18,7 @@ package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
 import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
+import com.sparkutils.testing.TestUtilsEnvironment.{onDatabricksFS, onFabricOrSynapse}
 import org.apache.spark.{SparkBuildInfo, sql}
 import org.apache.spark.sql.connect.SparkSession
 import org.apache.spark.sql.connect.client.{RetryPolicy, SparkConnectClient}
@@ -266,44 +267,76 @@ object SparkConnectServerUtils {
     spark
   }
 
-  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = Some(
-    new ConnectSession {
-      val filter =
-        serverConfig.get(DEBUG_CONNECT_LOGS_SYS).exists { v =>
-          System.setProperty(DEBUG_CONNECT_LOGS_SYS, v)
-          true
-        }
-
-      val utils = SparkConnectServerUtils(
-        if (filter)
-          serverConfig - DEBUG_CONNECT_LOGS_SYS
-        else
-          serverConfig
-      )
-
-      val th = System.getProperty("spark.test.home")
-      if (th eq null) {
-        new File("./testing_connect_tmp").mkdirs()
-        System.setProperty("spark.test.home","./testing_connect_tmp")
+  /**
+   * The extra indirection here with SparkSession.getActiveSession is to allow running on Databricks/Fabric in
+   * shared / isolated mode with the provided SparkSession.
+   * As this _in the junit testing scenario_ could be a classic session it is first checked for being a connect session.
+   *
+   * @param serverConfig
+   * @param clientConfig
+   * @return
+   */
+  def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = {
+    val spawnConnect =
+      SparkSession.getActiveSession.forall {
+        s =>
+          !classOf[org.apache.spark.sql.connect.SparkSession].isAssignableFrom(s.getClass)
       }
 
+    Some(
 
-      utils.start()
+      if (spawnConnect)
+        new ConnectSession {
 
-      private def createSparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
+           val filter =
+            serverConfig.get(DEBUG_CONNECT_LOGS_SYS).exists { v =>
+              System.setProperty(DEBUG_CONNECT_LOGS_SYS, v)
+              true
+            }
 
-      private var _sparkSession: SparkSession = createSparkSession
+          val utils = SparkConnectServerUtils(
+            if (filter)
+              serverConfig - DEBUG_CONNECT_LOGS_SYS
+            else
+              serverConfig
+          )
 
-      override def sparkSession: sql.SparkSession = _sparkSession
+          val th = System.getProperty("spark.test.home")
+          if (th eq null) {
+            new File("./testing_connect_tmp").mkdirs()
+            System.setProperty("spark.test.home","./testing_connect_tmp")
+          }
 
-      override def stopServer(): Unit = utils.stop()
 
-      override def resetSession(): Unit = {
-        if (sparkSession.isUsable) {
-          sparkSession.stop()
+          utils.start()
+
+          private def createSparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
+
+          private var _sparkSession: SparkSession = createSparkSession
+
+          override def sparkSession: sql.SparkSession = _sparkSession
+
+          override def stopServer(): Unit = utils.stop()
+
+          override def resetSession(): Unit =
+            if (!(onFabricOrSynapse(_sparkSession) || onDatabricksFS)) {
+              if (sparkSession.isUsable) {
+                sparkSession.stop()
+              }
+              _sparkSession = createSparkSession
+            } // else leave as is, no reset to do
         }
-        _sparkSession = createSparkSession
-      }
-    }
-  )
+      else
+        new ConnectSession {
+          /**
+           * only one as we were given it
+           */
+          override val sparkSession: sql.SparkSession = SparkSession.active
+
+          override def resetSession(): Unit = {}
+
+          override def stopServer(): Unit = {}
+        }
+    )
+  }
 }

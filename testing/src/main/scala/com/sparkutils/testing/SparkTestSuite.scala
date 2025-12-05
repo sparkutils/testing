@@ -1,5 +1,6 @@
 package com.sparkutils.testing
 
+import com.sparkutils.testing.SparkTestUtils.disableClassicTesting
 import org.apache.spark.sql.{ShimUtils, SparkSession}
 import org.scalatest.TestSuite
 
@@ -140,7 +141,7 @@ object SparkTestWrapper {
 
           callingTestInConnect(testFunction)(test)
         case _ if classic.isDefined => classic.get
-        case _ if !testUtils.disableClassicTesting => sys.error(s"Testing TestSuite has runWith ClassicOnly, but no classic session exists despite not being disabled")
+        case _ if !disableClassicTesting => sys.error(s"Testing TestSuite has runWith ClassicOnly, but no classic session exists despite not being disabled")
         case _ => skipped
       }
     } else

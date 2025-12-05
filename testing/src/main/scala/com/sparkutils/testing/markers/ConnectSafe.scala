@@ -10,5 +10,5 @@ object ConnectSafe {
    * Checks if the ConnectSafe trait is present, indicating a test suite is safe for use in a pure connect setup
    */
   def isConnectSafe(clazz: Class[_]): Boolean =
-    clazz.isAssignableFrom(classOf[ConnectSafe])
+    classOf[ConnectSafe].isAssignableFrom(clazz)
 }
