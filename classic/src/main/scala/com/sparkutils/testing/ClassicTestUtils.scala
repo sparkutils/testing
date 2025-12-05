@@ -35,6 +35,13 @@ trait ClassicTestUtils extends Serializable {
 
   val sparkVersionNumericMajor: Int
 
+  /**
+   * NOTE this cannot be used in pure connect testing
+   * @param logicalPlanRule
+   * @param secondRunWithoutPlan
+   * @param disable
+   * @param thunk
+   */
   def testPlan(logicalPlanRule: org.apache.spark.sql.catalyst.rules.Rule[LogicalPlan], secondRunWithoutPlan: Boolean = true, disable: Int => Boolean = _ => false)(thunk: => Unit): Unit = {
     val cur = SparkSession.getActiveSession.get.experimental.extraOptimizations
     try{

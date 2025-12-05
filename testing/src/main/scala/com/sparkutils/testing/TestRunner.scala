@@ -1,6 +1,7 @@
 package com.sparkutils.testing
 
 import com.google.common.reflect.ClassPath
+import com.sparkutils.testing.markers.ConnectSafe
 import org.scalatest.Suite
 
 import java.io.IOException
@@ -44,6 +45,21 @@ trait TestRunner {
     testViaClassLoader(args, 0)
   }
 
+  private val disableClassicTesting = SparkTestUtils.booleanEnvOrProp("SPARKUTILS_DISABLE_CLASSIC_TESTS")
+
+  /**
+   * By default, checks if SPARKUTILS_DISABLE_CLASSIC_TESTS is true and, if so, only selects suites implementing the
+   * ConnectSafe trait, otherwise it allows the suite through.
+   * Override to add different filters for your suite class files
+   * @param clazz
+   * @return
+   */
+  def usableTestSuite(clazz: Class[_]): Boolean =
+    if (disableClassicTesting) {
+      ConnectSafe.isConnectSafe(clazz)
+    } else
+      true
+
   @throws[IOException]
   def testViaClassLoader(args: Array[String], batchStartingNumber: Int): Unit = {
     val oargs = new util.ArrayList[String]
@@ -61,8 +77,11 @@ trait TestRunner {
         val clazz = itr.next().load()
         val suite = clazz.newInstance.asInstanceOf[Suite]
         // it's a suite
-        classargs.add("-s")
-        classargs.add(clazz.getName)
+        if (usableTestSuite(clazz)) {
+          // we should use it
+          classargs.add("-s")
+          classargs.add(clazz.getName)
+        }
       } catch {
         case t: Throwable =>
         // ignore
@@ -135,6 +154,5 @@ trait TestRunner {
   def test(): Unit = {
     test(Array.empty[String])
   }
-
 
 }
