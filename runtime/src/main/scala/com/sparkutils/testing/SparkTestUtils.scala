@@ -5,6 +5,7 @@ import org.apache.spark.sql.SparkSession
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.Try
+import scala.jdk.CollectionConverters._
 
 object SparkTestUtils {
 
@@ -20,6 +21,23 @@ object SparkTestUtils {
     parseBoolean( System.getenv(env) ).orElse(
       parseBoolean( System.getProperty(env) )
     ).getOrElse(default)
+
+  def stringEnvOrProp(env: String, default: String = null): String =
+    Option( System.getenv(env) ).orElse(
+      Option( System.getProperty(env) )
+    ).getOrElse(default)
+
+  def configFromPrefix(prefix: String): Map[String, String] = {
+    def hasPrefix(p: (String, String)) =
+      if (p._1.startsWith(prefix))
+        Some((p._1.drop(prefix.length), p._2))
+      else
+        None
+
+    (System.getenv().asScala.flatMap(hasPrefix) ++
+      System.getProperties.asScala.flatMap(hasPrefix)).toMap
+  }
+
 
   /**
    * If there is a sparkSession already _and_ it's connect - then default to true, otherwise false.
@@ -135,7 +153,7 @@ object SparkTestUtils {
    */
   def jvmOpt(pair: (String, String)) = FLAT_JVM_OPTION+pair._1 -> pair._2
 
-  private val _runtimeConnectClientConfig = new AtomicReference[Map[String,String]](Map.empty)
+  private val _runtimeConnectClientConfig = new AtomicReference[Map[String,String]](configFromPrefix("SPARKUTILS_CONNECT_CLIENT."))
 
   def setRuntimeConnectClientConfig(config: Map[String, String]): Unit = {
     _runtimeConnectClientConfig.set(config)
@@ -146,7 +164,8 @@ object SparkTestUtils {
    */
   lazy val runtimeConnectClientConfig: Map[String, String] = _runtimeConnectClientConfig.get()
 
-  private val _runtimeClassicConfig = new AtomicReference[Map[String,String]](Map.empty)
+
+  private val _runtimeClassicConfig = new AtomicReference[Map[String,String]](configFromPrefix("SPARKUTILS_CONNECT_SERVER."))
 
   def setRuntimeClassicConfig(config: Map[String, String]): Unit = {
     _runtimeClassicConfig.set(config)
@@ -157,9 +176,9 @@ object SparkTestUtils {
    */
   lazy val runtimeClassicConfig: Map[String, String] = _runtimeClassicConfig.get()
 
-
-
-  protected val tpath = new AtomicReference[String]("./target/testData")
+  protected val tpath = new AtomicReference[String](
+    stringEnvOrProp("SPARKUTILS_TEST_OUTPUTDIR", "./target/testData")
+  )
 
   def ouputDir = tpath.get
 

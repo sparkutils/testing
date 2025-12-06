@@ -2,7 +2,7 @@ package com.sparkutils.testing
 
 import com.google.common.reflect.ClassPath
 import com.sparkutils.testing.SparkTestUtils.disableClassicTesting
-import com.sparkutils.testing.markers.ConnectSafe
+import com.sparkutils.testing.markers.{ConnectSafe, DontRunOnPureConnect}
 import org.scalatest.Suite
 
 import java.io.IOException
@@ -55,7 +55,7 @@ trait TestRunner {
    */
   def usableTestSuite(clazz: Class[_]): Boolean =
     if (disableClassicTesting)
-      ConnectSafe.isConnectSafe(clazz)
+      ConnectSafe.isConnectSafe(clazz) && !DontRunOnPureConnect.shouldNotRunOnPureConnect(clazz)
     else
       true
 
