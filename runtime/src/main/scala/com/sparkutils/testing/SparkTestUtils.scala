@@ -34,8 +34,8 @@ object SparkTestUtils {
       else
         None
 
-    (System.getenv().asScala.flatMap(hasPrefix) ++
-      System.getProperties.asScala.flatMap(hasPrefix)).toMap
+    (System.getenv().asScala.flatMap(hasPrefix _) ++
+      System.getProperties.asScala.flatMap(hasPrefix _)).toMap
   }
 
 
