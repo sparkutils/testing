@@ -17,7 +17,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
-import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, classPathJars, connectServerJars, testClassPaths}
+import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, booleanEnvOrProp, classPathJars, connectServerJars, testClassPaths}
 import com.sparkutils.testing.TestUtilsEnvironment.{onDatabricksFS, onFabricOrSynapse}
 import org.apache.spark.{SparkBuildInfo, sql}
 import org.apache.spark.sql.connect.SparkSession
@@ -278,65 +278,77 @@ object SparkConnectServerUtils {
    */
   def localConnectServerForTesting(serverConfig: Map[String, String], clientConfig: Map[String, String]): Option[ConnectSession] = {
     val spawnConnect =
+      // on Databricks (and possibly fabric) this will be provided for notebooks and for testing remotely
       SparkSession.getActiveSession.forall {
         s =>
           !classOf[org.apache.spark.sql.connect.SparkSession].isAssignableFrom(s.getClass)
       }
 
+    // doing a SparkSession.builder.config("spark.api.mode", "connect").getOrCreate() works fine on
+    // classic non-shared databricks setup, should also be the case for a normal submitted job on OSS / Fabric
+    val localOnly = booleanEnvOrProp("SPARKUTILS_TESTING_USE_LOCAL_CONNECT")
+
     Some(
 
-      if (spawnConnect)
-        new ConnectSession {
+      if (spawnConnect) {
+        // if there is a forced local connect, e.g. running 4.0.0 full shades on a later Fabric 1.4 that doesn't force a
+        // connect setup, we have a way out
+        if (localOnly)
+          ExistingSession(SparkSession.builder.config("spark.api.mode", "connect").getOrCreate())
+        else
+          new ConnectSession {
 
-           val filter =
-            serverConfig.get(DEBUG_CONNECT_LOGS_SYS).exists { v =>
-              System.setProperty(DEBUG_CONNECT_LOGS_SYS, v)
-              true
+             val filter =
+              serverConfig.get(DEBUG_CONNECT_LOGS_SYS).exists { v =>
+                System.setProperty(DEBUG_CONNECT_LOGS_SYS, v)
+                true
+              }
+
+            val utils = SparkConnectServerUtils(
+              if (filter)
+                serverConfig - DEBUG_CONNECT_LOGS_SYS
+              else
+                serverConfig
+            )
+
+            val th = System.getProperty("spark.test.home")
+            if (th eq null) {
+              new File("./testing_connect_tmp").mkdirs()
+              System.setProperty("spark.test.home","./testing_connect_tmp")
             }
 
-          val utils = SparkConnectServerUtils(
-            if (filter)
-              serverConfig - DEBUG_CONNECT_LOGS_SYS
-            else
-              serverConfig
-          )
 
-          val th = System.getProperty("spark.test.home")
-          if (th eq null) {
-            new File("./testing_connect_tmp").mkdirs()
-            System.setProperty("spark.test.home","./testing_connect_tmp")
+            utils.start()
+
+            private def createSparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
+
+            private var _sparkSession: SparkSession = createSparkSession
+
+            override def sparkSession: sql.SparkSession = _sparkSession
+
+            override def stopServer(): Unit = utils.stop()
+
+            override def resetSession(): Unit =
+              if (!(onFabricOrSynapse(_sparkSession) || onDatabricksFS)) {
+                if (sparkSession.isUsable) {
+                  sparkSession.stop()
+                }
+                _sparkSession = createSparkSession
+              } // else leave as is, no reset to do
           }
-
-
-          utils.start()
-
-          private def createSparkSession: SparkSession = SparkConnectServerUtils.createSparkSession(utils.port, clientConfig)
-
-          private var _sparkSession: SparkSession = createSparkSession
-
-          override def sparkSession: sql.SparkSession = _sparkSession
-
-          override def stopServer(): Unit = utils.stop()
-
-          override def resetSession(): Unit =
-            if (!(onFabricOrSynapse(_sparkSession) || onDatabricksFS)) {
-              if (sparkSession.isUsable) {
-                sparkSession.stop()
-              }
-              _sparkSession = createSparkSession
-            } // else leave as is, no reset to do
-        }
-      else
-        new ConnectSession {
-          /**
-           * only one as we were given it
-           */
-          override val sparkSession: sql.SparkSession = SparkSession.active
-
-          override def resetSession(): Unit = {}
-
-          override def stopServer(): Unit = {}
-        }
+      } else
+        ExistingSession(SparkSession.active)
     )
+  }
+
+  case class ExistingSession(existingSparkSession: sql.SparkSession) extends ConnectSession {
+    /**
+     * only one as we were given it
+     */
+    override val sparkSession: sql.SparkSession = existingSparkSession
+
+    override def resetSession(): Unit = {}
+
+    override def stopServer(): Unit = {}
   }
 }
