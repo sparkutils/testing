@@ -5,7 +5,7 @@ import org.apache.spark.sql.SparkSession
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.Try
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters._
 
 object SparkTestUtils {
 
