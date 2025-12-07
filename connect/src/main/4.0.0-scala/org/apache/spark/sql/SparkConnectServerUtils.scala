@@ -219,7 +219,7 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
 
 object SparkConnectServerUtils {
 
-  def syncTestDependencies(spark: SparkSession): Unit = {
+  def syncTestDependencies(spark: SparkSession): SparkSession = {
     // add all test dirs in the classpath
     testClassPaths.map(e => Paths.get(e)).foreach {
       testClassesPath =>
@@ -238,6 +238,7 @@ object SparkConnectServerUtils {
       }
       .map(e => Paths.get(e).toUri)
     spark.client.artifactManager.addArtifacts(jars.toImmutableArraySeq)
+    spark
   }
 
   def createSparkSession(port: Int, clientConfig: Map[String, String]): SparkSession = {
@@ -293,7 +294,7 @@ object SparkConnectServerUtils {
 
     Some(
       if (connectURL ne null)
-        ExistingSession(SparkSession.builder.config(clientConfig).getOrCreate())
+        ExistingSession(syncTestDependencies(SparkSession.builder.config(clientConfig).getOrCreate()))
       else
         if (spawnConnect) {
           // if there is a forced local connect, e.g. running 4.0.0 full shades on a later Fabric 1.4 that doesn't force a
@@ -342,7 +343,7 @@ object SparkConnectServerUtils {
                 } // else leave as is, no reset to do
             }
         } else
-          ExistingSession(SparkSession.active)
+          ExistingSession(syncTestDependencies(SparkSession.active)) // TODO - needed?
     )
   }
 

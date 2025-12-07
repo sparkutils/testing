@@ -140,7 +140,7 @@ trait TestRunner {
   @throws[IOException]
   def runTestName(testName: String): Unit = {
     val oargs = new util.ArrayList[String]
-    oargs.add("-oWDFT")
+    scalaTestArgs.foreach(oargs.add)
     oargs.add("-s")
     oargs.add(testName)
     val joined = new Array[String](oargs.size)
