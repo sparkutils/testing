@@ -236,8 +236,8 @@ object SparkConnectServerUtils {
       .split(File.pathSeparatorChar)
       .filter { e: String =>
         val fileName = e.substring(e.lastIndexOf(File.separatorChar) + 1)
-        fileName.endsWith(".jar") &&
-          jarPrefixes.exists(fileName.startsWith)
+
+        fileName.endsWith(".jar") && jarPrefixes.exists(fileName.startsWith)
       }
       .map(e => Paths.get(e).toUri)
     spark.client.artifactManager.addArtifacts(jars.toImmutableArraySeq)

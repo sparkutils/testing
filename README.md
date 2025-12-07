@@ -75,6 +75,8 @@ which will start the batch running of tests.
 ```scala
 trait SharedPureConnectTests extends FunSuite with SharedSessions with SparkTestSuite with ConnectSafe {
 
+  override val currentSessionsHolder: SessionsStateHolder = GlobalSession
+
   override def sparkConnectServerConfig(): Map[String, String] =
     super.sparkConnectServerConfig() + // useDebugConnectLogs +
       scoverageClassPathsConfig + connectMemory("4g") +
