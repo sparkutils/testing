@@ -60,12 +60,6 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
     cleanUp(outputDir)
 
   /**
-   * Don't run this test on 2.4 - typically due to not being able to control code gen properly
-   */
-  def not2_4(thunk: => Unit) =
-    if (sparkVersion != "2.4") thunk
-
-  /**
    * Don't run this test on 3.4 - gc's on code gen
    */
   def not3_4(thunk: => Unit) =
@@ -108,18 +102,11 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
     if (sparkVersionNumericMajor >= 40) thunk
 
   /**
-   * Only run this on 2.4
-   * @param thunk
-   */
-  def only2_4(thunk: => Unit) =
-    if (sparkVersion == "2.4") thunk
-
-  /**
    * transform_values and transform_keys pattern match on list only which doesn't work with seq in the _lambda_ param re-writes
    * @param thunk
    */
-  def not2_4_or_3_0_or_3_1(thunk: => Unit) =
-    if (!Set("2.4", "3.0", "3.1").contains(sparkVersion)) thunk
+  def not3_0_or_3_1(thunk: => Unit) =
+    if (!Set("3.0", "3.1").contains(sparkVersion)) thunk
 
   /**
    * Assumes /dbfs existance proves running on Databricks
