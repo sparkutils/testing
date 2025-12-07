@@ -17,7 +17,7 @@
 package org.apache.spark.sql
 
 import com.sparkutils.testing.ConnectSession
-import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, booleanEnvOrProp, classPathJars, connectServerJars, stringEnvOrProp, testClassPaths}
+import com.sparkutils.testing.SparkTestUtils.{DEBUG_CONNECT_LOGS_SYS, FLAT_JVM_OPTION, MAIN_CLASSPATH, REMOTE_CONNECT_JAR_PREFIXES, booleanEnvOrProp, classPathJars, connectServerJars, mainClassPaths, scoverageClassPaths, scoverageClassPathsConfig, stringEnvOrProp, testClassPaths}
 import com.sparkutils.testing.TestUtilsEnvironment.{onDatabricksFS, onFabricOrSynapse}
 import org.apache.spark.{SparkBuildInfo, sql}
 import org.apache.spark.sql.connect.SparkSession
@@ -219,13 +219,17 @@ case class SparkConnectServerUtils(config: Map[String, String]) {
 
 object SparkConnectServerUtils {
 
-  def syncTestDependencies(spark: SparkSession): SparkSession = {
-    // add all test dirs in the classpath
-    testClassPaths.map(e => Paths.get(e)).foreach {
+  def syncTestDependencies(spark: SparkSession, clientConfig: Map[String, String]): SparkSession = {
+    // add all dirs in the classpath
+    (scoverageClassPaths ++ testClassPaths ++ mainClassPaths).map(e => Paths.get(e)).foreach {
       testClassesPath =>
         spark.client.artifactManager.addClassDir(testClassesPath)
     }
 
+    val jarPrefixes = Seq("scalatest", "scalactic", "testing") ++
+      clientConfig.getOrElse(REMOTE_CONNECT_JAR_PREFIXES, "").split(",").map(_.trim).filterNot(_.isEmpty)
+
+    // incorrect - need to add in testing as well, possibly others, needs expansion options
     // We need scalatest & scalactic on the session's classpath to make the tests work.
     val jars = System
       .getProperty("java.class.path")
@@ -233,8 +237,7 @@ object SparkConnectServerUtils {
       .filter { e: String =>
         val fileName = e.substring(e.lastIndexOf(File.separatorChar) + 1)
         fileName.endsWith(".jar") &&
-          (fileName.startsWith("scalatest") || fileName.startsWith("scalactic") ||
-            (fileName.startsWith("spark-catalyst") && fileName.endsWith("-tests")))
+          jarPrefixes.exists(fileName.startsWith)
       }
       .map(e => Paths.get(e).toUri)
     spark.client.artifactManager.addArtifacts(jars.toImmutableArraySeq)
@@ -263,7 +266,7 @@ object SparkConnectServerUtils {
     }
 
     // Auto-sync dependencies.
-    syncTestDependencies(spark)
+    syncTestDependencies(spark, clientConfig)
 
     spark
   }
@@ -294,7 +297,7 @@ object SparkConnectServerUtils {
 
     Some(
       if (connectURL ne null)
-        ExistingSession(syncTestDependencies(SparkSession.builder.config(clientConfig).getOrCreate()))
+        ExistingSession(syncTestDependencies(SparkSession.builder.config(clientConfig).getOrCreate(), clientConfig))
       else
         if (spawnConnect) {
           // if there is a forced local connect, e.g. running 4.0.0 full shades on a later Fabric 1.4 that doesn't force a
@@ -343,7 +346,7 @@ object SparkConnectServerUtils {
                 } // else leave as is, no reset to do
             }
         } else
-          ExistingSession(syncTestDependencies(SparkSession.active)) // TODO - needed?
+          ExistingSession(syncTestDependencies(SparkSession.active, clientConfig))
     )
   }
 

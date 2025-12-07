@@ -129,7 +129,10 @@ trait TestRunner {
 
   @throws[IOException]
   def test(args: Array[String]): Unit = {
-    test(args, 0)
+    if (args.size == 1 && args(0).startsWith("just="))
+      runTestName(args(0).drop("just=".length))
+    else
+      test(args, 0)
   }
 
   @throws[IOException]

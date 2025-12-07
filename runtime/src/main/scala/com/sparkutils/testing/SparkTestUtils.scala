@@ -132,7 +132,10 @@ object SparkTestUtils {
    */
   val useDebugConnectLogs: (String, String) = DEBUG_CONNECT_LOGS_SYS -> "true"
 
-
+  /**
+   * Extra jar name prefixes to provide remote connect clients to register jars, scoverage, main and test class directories are automatically provided
+   */
+  val REMOTE_CONNECT_JAR_PREFIXES = "REMOTE_CONNECT_JAR_PREFIXES"
 
   /**
    * PREFIX configuration item keys with this in order to provide additional JVM options (e.g. -D's or memory settings)
