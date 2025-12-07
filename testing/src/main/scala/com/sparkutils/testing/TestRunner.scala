@@ -7,6 +7,7 @@ import org.scalatest.Suite
 
 import java.io.IOException
 import java.util
+import scala.collection.mutable
 
 /**
  * Extend this trait as an object to create a test runner
@@ -33,7 +34,8 @@ trait TestRunner {
    */
   val scalaTestArgs: Seq[String] = Seq("-oWDFT")
 
-  def numberOfBatches(numberOfClasses: Int) = numberOfClasses / 2 / 10
+  def numberOfBatches(numberOfClasses: Int) = Math.round(numberOfClasses / 2.0 / 10.0).toInt
+
   val argsPerBatch = 20
 
   @throws[IOException]
@@ -61,13 +63,11 @@ trait TestRunner {
 
   @throws[IOException]
   def testViaClassLoader(args: Array[String], batchStartingNumber: Int): Unit = {
-    val oargs = new util.ArrayList[String]
-    scalaTestArgs.foreach(oargs.add)
+    val oargs = mutable.ArrayBuffer[String]()
+    oargs ++= scalaTestArgs
+    oargs ++= args
 
-    for (i <- 0 until args.length) {
-      oargs.add(args(i))
-    }
-    val classargs = new util.ArrayList[String]
+    val classargs = mutable.ArrayBuffer[String]()
     val classPath = ClassPath.from(classLoader)
     val framelessInfo = classPath.getTopLevelClassesRecursive(packageName)
     val itr = framelessInfo.iterator()
@@ -78,8 +78,8 @@ trait TestRunner {
         // it's a suite
         if (usableTestSuite(clazz)) {
           // we should use it
-          classargs.add("-s")
-          classargs.add(clazz.getName)
+          classargs.append( "-s" )
+          classargs.append( clazz.getName )
         }
       } catch {
         case t: Throwable =>
@@ -97,15 +97,16 @@ trait TestRunner {
     }
     for (i <- batchStartingNumber until numberOfBatchesN) {
       System.out.println(s"$projectName - starting test batch $i")
-      val joined = new Array[String](oargs.size + argsPerBatch)
-      oargs.toArray[String](joined)
+      val joined = mutable.ArrayBuffer[String]()
+      joined ++= oargs
+
       var j = 0
       while (j < argsPerBatch && classargItr.hasNext) {
-        joined(oargs.size + j) = classargItr.next
+        joined.append( classargItr.next )
 
         j += 1
       }
-      org.scalatest.tools.Runner.run(joined)
+      org.scalatest.tools.Runner.run(joined.toArray)
       System.out.println(s"$projectName - gc'ing after finishing test batch $i")
       System.gc()
       System.gc()
