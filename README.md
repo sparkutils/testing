@@ -17,8 +17,9 @@ Key features:
 * ScalaTests are run against both Spark Connect and Classic
 * Tests can run remotely against Connect Severs (including Databricks 17.3)
   - local class and test files will be automatically sent to the servers (jars can additionally be sent via config) enabling map and udf usage 
+  - SPARK_REMOTE is detected to disable classic tests by default 
 * Session handling works with existing connections,
-  - automatically disabling rule Suites that are assignable to DontRunOnPureConnect and running those with ConnectSafe marker traits.
+  - with Connect connections, automatically disabling rule Suites that are assignable to DontRunOnPureConnect and running those with ConnectSafe marker traits.
   - will start up local Connect Servers for you in the IDE
 
 ## Usage
@@ -96,4 +97,4 @@ class MyTestSuite extends SharedPureConnectTests {
 
 ```
 
-The 'my logic' test will run on both Connect and Classic for Spark 4 builds.
+The 'my logic' test will run on both Connect and Classic for Spark 4 builds, or just ConnectSafe tests when defining SPARK_REMOTE for example.
