@@ -145,7 +145,9 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
         System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, "true")
         thunk
       } finally {
-        System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, prev)
+        if (prev ne null) {
+          System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, prev)
+        }
       }
     } else {
       thunk // using whatever is current
