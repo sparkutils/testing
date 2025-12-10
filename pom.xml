@@ -371,7 +371,7 @@
     </profiles>
 
     <properties>
-        <revision>0.0.1-SNAPSHOT</revision>
+        <revision>0.0.1-baseline1</revision>
 
         <framelessCompatVersion></framelessCompatVersion>
         <mavenFlattenPluginVersion>1.2.7</mavenFlattenPluginVersion>
@@ -410,8 +410,8 @@
         <!-- for oss builds -->
         <snakeVersion>1.33</snakeVersion>
         <snakeScope>compile</snakeScope>
-        <shimCompilationVersion>0.3.0-baseline2-SNAPSHOT</shimCompilationVersion>
-        <shimRuntimeVersion>0.3.0-baseline2-SNAPSHOT</shimRuntimeVersion>
+        <shimCompilationVersion>0.3.0-baseline2</shimCompilationVersion>
+        <shimRuntimeVersion>0.3.0-baseline2</shimRuntimeVersion>
 
         <framelessCoreCompatVersion></framelessCoreCompatVersion>
         <framelessOrg>org.typelevel</framelessOrg>
@@ -431,7 +431,7 @@
         <!--<repository>
             <id>apache_snaps</id>
             <url>https://repository.apache.org/content/repositories/snapshots/</url>
-        </repository> -->
+        </repository>-->
         <repository>
             <id>central_snaps</id>
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>

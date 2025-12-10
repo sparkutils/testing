@@ -133,7 +133,7 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
 
   /**
    * When inConnect is true the thunk is run once with SPARKUTILS_TESTING_FORCE_CONNECT=false and then
-   * with SPARKUTILS_TESTING_FORCE_CONNECT=true enabling functions using someOrForcedConnect to be tested.
+   * with SPARKUTILS_TESTING_FORCE_CONNECT=true enabling functions using ConnectWhenForced.someOrForcedConnect to be tested.
    * @param thunk
    */
   def defaultAndforceConnect(thunk: => Unit): Unit =
