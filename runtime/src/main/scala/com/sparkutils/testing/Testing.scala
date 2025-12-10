@@ -51,7 +51,7 @@ object ConnectWhenForced {
   /**
    * When SPARKUTILS_TESTING_FORCE_CONNECT is set to true in ENV or Sys properties then None is returned otherwise thunk.
    *
-   * This is set/reset by the TestUtils.defaultAndforceConnect helper function
+   * This is set/reset by the TestUtils.defaultAndForceConnect helper function
    *
    * @param thunk
    * @tparam T

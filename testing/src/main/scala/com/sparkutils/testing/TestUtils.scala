@@ -136,7 +136,7 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
    * with SPARKUTILS_TESTING_FORCE_CONNECT=true enabling functions using ConnectWhenForced.someOrForcedConnect to be tested.
    * @param thunk
    */
-  def defaultAndforceConnect(thunk: => Unit): Unit =
+  def defaultAndForceConnect(thunk: => Unit): Unit =
     if (inConnect.get()) {
       val prev = System.getProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME) // only possible to change property
       try {
@@ -147,6 +147,8 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
       } finally {
         if (prev ne null) {
           System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, prev)
+        } else {
+          System.clearProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME)
         }
       }
     } else {
