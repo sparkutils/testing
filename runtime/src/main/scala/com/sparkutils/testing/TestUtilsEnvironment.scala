@@ -21,7 +21,7 @@ object TestUtilsEnvironment {
       if (sp ne null)
         sp
       else
-        SQLConf.get.getConfString(name, default)
+        default
     }
   } catch {
     case _: Throwable => default
