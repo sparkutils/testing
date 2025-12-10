@@ -371,7 +371,7 @@
     </profiles>
 
     <properties>
-        <revision>0.0.1-RC1</revision>
+        <revision>0.0.1-SNAPSHOT</revision>
 
         <framelessCompatVersion></framelessCompatVersion>
         <mavenFlattenPluginVersion>1.2.7</mavenFlattenPluginVersion>
