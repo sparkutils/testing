@@ -42,3 +42,25 @@ object SparkVersions {
 
   lazy val sparkMajorVersion = sparkFullVersion.split('.').head
 }
+
+
+object ConnectWhenForced {
+
+  val FORCED_CONNECT_PROPERTY_NAME = "SPARKUTILS_TESTING_FORCE_CONNECT"
+
+  /**
+   * When SPARKUTILS_TESTING_FORCE_CONNECT is set to true in ENV or Sys properties then None is returned otherwise thunk.
+   *
+   * This is set/reset by the TestUtils.defaultAndforceConnect helper function
+   *
+   * @param thunk
+   * @tparam T
+   * @return
+   */
+  def someOrForcedConnect[T](thunk: => T): Option[T] =
+    if (TestUtilsEnvironment.getConfig(FORCED_CONNECT_PROPERTY_NAME, "false").toBoolean)
+      None
+    else
+      Some(thunk)
+
+}

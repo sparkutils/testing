@@ -131,6 +131,26 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
   def not_Cluster(thunk: => Unit): Unit =
     if (TestUtilsEnvironment.shouldRunClusterTests) thunk
 
+  /**
+   * When inConnect is true the thunk is run once with SPARKUTILS_TESTING_FORCE_CONNECT=false and then
+   * with SPARKUTILS_TESTING_FORCE_CONNECT=true enabling functions using someOrForcedConnect to be tested.
+   * @param thunk
+   */
+  def defaultAndforceConnect(thunk: => Unit): Unit =
+    if (inConnect.get()) {
+      val prev = System.getProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME) // only possible to change property
+      try {
+        System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, "false")
+        thunk
+        System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, "true")
+        thunk
+      } finally {
+        System.setProperty(ConnectWhenForced.FORCED_CONNECT_PROPERTY_NAME, prev)
+      }
+    } else {
+      thunk // using whatever is current
+    }
+
 }
 
 object TestUtils {

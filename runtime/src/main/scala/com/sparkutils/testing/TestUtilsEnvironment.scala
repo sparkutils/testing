@@ -8,6 +8,26 @@ import java.io.File
 object TestUtilsEnvironment {
 
   /**
+   * first attempts to get the system env, then system java property then sqlconf
+   * @param name
+   * @return
+   */
+  def getConfig(name: String, default: String = "") = try {
+    val res = System.getenv(name)
+    if (res ne null)
+      res
+    else {
+      val sp = System.getProperty(name)
+      if (sp ne null)
+        sp
+      else
+        SQLConf.get.getConfString(name, default)
+    }
+  } catch {
+    case _: Throwable => default
+  }
+
+  /**
    * Checks if the master is local, if so it's likely tests, if spark.master is not defined it's false
    */
   def isLocal(sparkSession: SparkSession): Boolean =
