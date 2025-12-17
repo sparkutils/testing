@@ -102,6 +102,13 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
     if (sparkVersionNumericMajor >= 40) thunk
 
   /**
+   * introduced due to SPARK-53900 fix
+   * @param thunk
+   */
+  def v4_1_and_above(thunk: => Unit) =
+    if (sparkVersionNumericMajor >= 41) thunk
+
+  /**
    * transform_values and transform_keys pattern match on list only which doesn't work with seq in the _lambda_ param re-writes
    * @param thunk
    */

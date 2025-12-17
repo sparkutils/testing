@@ -264,6 +264,40 @@
 
         </profile>
         <profile>
+            <id>Spark41</id>
+            <properties>
+                <shimRuntime>4.1.0.oss</shimRuntime>
+                <shimCompilationRuntime>4.1.0.oss</shimCompilationRuntime>
+                <dbrCompatVersion>4.0.0.oss_</dbrCompatVersion>
+                <scalaVersion>2.13.18</scalaVersion>
+                <scalaCompatVersion>2.13</scalaCompatVersion>
+                <sparkVersion>4.1.0</sparkVersion>
+                <sparkCompatVersion>4.1</sparkCompatVersion>
+                <profileDir>4.0.0</profileDir>
+                <jacksonVersion>2.15.2</jacksonVersion> <!-- scalameter dependency is 2.9.10 so perf tests runs need to change it -->
+                <guavaVersion>15.0</guavaVersion> <!-- databricks runtime version -->
+                <parserCombinatorVersion>1.1.2</parserCombinatorVersion> <!-- databricks runtime version -->
+                <elidebelow>2</elidebelow>
+                <refinedVersion>0.9.28</refinedVersion>
+                <deltaCoreVersion>4.0.0</deltaCoreVersion>
+                <deltaArtifact>spark</deltaArtifact>
+                <snakeVersion>2.0</snakeVersion>
+                <shapelessVersion>2.3.10</shapelessVersion>
+                <scalatestVersion>3.0.9</scalatestVersion>
+
+                <framelessVersion>1.0.0</framelessVersion>
+                <framelessCoreCompatVersion>_4.0</framelessCoreCompatVersion>
+                <framelessCompatVersion>_4.0</framelessCompatVersion>
+                <framelessOrg>com.sparkutils</framelessOrg>
+
+                <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
+                <!-- spark-api is pulled from spark-sql, but for this library we need to use connect-client instead -->
+                <spark.api>spark-sql-api</spark.api>
+                <javaLangVersion>17</javaLangVersion>
+            </properties>
+
+        </profile>
+        <profile>
             <id>14.3.dbr</id>
             <properties>
                 <shimRuntime>14.3.dbr</shimRuntime>
@@ -371,7 +405,7 @@
     </profiles>
 
     <properties>
-        <revision>0.0.1-baseline1.2</revision>
+        <revision>0.0.1-baseline1.3-SNAPSHOT</revision>
 
         <framelessCompatVersion></framelessCompatVersion>
         <mavenFlattenPluginVersion>1.2.7</mavenFlattenPluginVersion>
@@ -410,8 +444,8 @@
         <!-- for oss builds -->
         <snakeVersion>1.33</snakeVersion>
         <snakeScope>compile</snakeScope>
-        <shimCompilationVersion>0.3.0-baseline2</shimCompilationVersion>
-        <shimRuntimeVersion>0.3.0-baseline2</shimRuntimeVersion>
+        <shimCompilationVersion>0.3.0-baseline3-SNAPSHOT</shimCompilationVersion>
+        <shimRuntimeVersion>0.3.0-baseline3-SNAPSHOT</shimRuntimeVersion>
 
         <framelessCoreCompatVersion></framelessCoreCompatVersion>
         <framelessOrg>org.typelevel</framelessOrg>
@@ -425,6 +459,7 @@
         <javaLangVersion>9</javaLangVersion>
         <javaLangScalacFlag></javaLangScalacFlag>
         <javaLangScalacTargetFlag></javaLangScalacTargetFlag>
+        <kindProjectorVersion>0.13.4</kindProjectorVersion>
     </properties>
 
     <repositories>
@@ -551,7 +586,7 @@
                             <compilerPlugin>
                                 <groupId>org.typelevel</groupId>
                                 <artifactId>kind-projector_${scalaVersion}</artifactId>
-                                <version>0.13.3</version>
+                                <version>${kindProjectorVersion}</version>
                             </compilerPlugin>
                         </compilerPlugins>
                     </configuration>
@@ -851,7 +886,7 @@
                         <compilerPlugin>
                             <groupId>org.typelevel</groupId>
                             <artifactId>kind-projector</artifactId>
-                            <version>0.13.3</version>
+                            <version>${kindProjectorVersion}</version>
                         </compilerPlugin>
                     </compilerPlugins>
                 </configuration>
