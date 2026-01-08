@@ -405,7 +405,7 @@
     </profiles>
 
     <properties>
-        <revision>0.0.1-baseline1.3-SNAPSHOT</revision>
+        <revision>0.0.1-baseline1.3-SNAPSHOT</revision> <!-- -->
 
         <framelessCompatVersion></framelessCompatVersion>
         <mavenFlattenPluginVersion>1.2.7</mavenFlattenPluginVersion>
