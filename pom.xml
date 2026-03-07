@@ -474,8 +474,8 @@
         <!-- for oss builds -->
         <snakeVersion>1.33</snakeVersion>
         <snakeScope>compile</snakeScope>
-        <shimCompilationVersion>0.3.0-baseline3-SNAPSHOT</shimCompilationVersion>
-        <shimRuntimeVersion>0.3.0-baseline3-SNAPSHOT</shimRuntimeVersion>
+        <shimCompilationVersion>0.3.0-baseline3.2</shimCompilationVersion>
+        <shimRuntimeVersion>0.3.0-baseline3.2</shimRuntimeVersion>
 
         <framelessCoreCompatVersion></framelessCoreCompatVersion>
         <framelessOrg>org.typelevel</framelessOrg>
