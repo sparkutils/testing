@@ -15,7 +15,6 @@ jobs:
 
   publish_21:
     uses: sparkutils/building/.github/workflows/publish_build.yml@main
-    needs: [noTest_builds_21, test_builds_21]
     with:
       theMatrix: |
         {
