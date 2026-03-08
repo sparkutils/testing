@@ -268,7 +268,7 @@
             <properties>
                 <shimRuntime>4.1.0.oss</shimRuntime>
                 <shimCompilationRuntime>4.1.0.oss</shimCompilationRuntime>
-                <dbrCompatVersion>4.0.0.oss_</dbrCompatVersion>
+                <dbrCompatVersion>4.1.0.oss_</dbrCompatVersion>
                 <scalaVersion>2.13.18</scalaVersion>
                 <scalaCompatVersion>2.13</scalaCompatVersion>
                 <sparkVersion>4.1.0</sparkVersion>
@@ -405,9 +405,9 @@
         <profile>
             <id>18.1.dbr</id>
             <properties>
-                <shimRuntime>17.3.dbr</shimRuntime>
-                <shimCompilationRuntime>17.3.dbr</shimCompilationRuntime>
-                <dbrCompatVersion>17.3.dbr_</dbrCompatVersion>
+                <shimRuntime>18.1.dbr</shimRuntime>
+                <shimCompilationRuntime>18.1.dbr</shimCompilationRuntime>
+                <dbrCompatVersion>18.1.dbr_</dbrCompatVersion>
                 <scalaVersion>2.13.16</scalaVersion>
                 <scalaCompatVersion>2.13</scalaCompatVersion>
                 <sparkVersion>4.1.0</sparkVersion>
