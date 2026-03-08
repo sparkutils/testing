@@ -430,6 +430,7 @@
                 <framelessOrg>com.sparkutils</framelessOrg>
 
                 <scalaCollectionCompatVersion>2.13.0</scalaCollectionCompatVersion>
+                <javaLangVersion>17</javaLangVersion>
             </properties>
         </profile>
     </profiles>
