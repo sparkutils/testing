@@ -24,6 +24,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.sparkutils</groupId>
+            <artifactId>shim_runtime_${shimRuntime}_${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+            <version>${shimRuntimeVersion}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
