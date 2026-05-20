@@ -80,7 +80,7 @@
             </dependencies>
         </profile>
         <profile>
-            <id>18.1.dbr</id>
+            <id>18.3.dbr</id>
             <dependencies>
                 <!-- actual client code needed to connect is passed via spark.api -->
                 <!-- shared test code - Probably shouldn't need it -->

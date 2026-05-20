@@ -403,11 +403,11 @@
             </properties>
         </profile>
         <profile>
-            <id>18.1.dbr</id>
+            <id>18.3.dbr</id>
             <properties>
-                <shimRuntime>18.1.dbr</shimRuntime>
-                <shimCompilationRuntime>18.1.dbr</shimCompilationRuntime>
-                <dbrCompatVersion>18.1.dbr_</dbrCompatVersion>
+                <shimRuntime>18.3.dbr</shimRuntime>
+                <shimCompilationRuntime>18.3.dbr</shimCompilationRuntime>
+                <dbrCompatVersion>18.3.dbr_</dbrCompatVersion>
                 <scalaVersion>2.13.16</scalaVersion>
                 <scalaCompatVersion>2.13</scalaCompatVersion>
                 <sparkVersion>4.1.0</sparkVersion>
@@ -475,8 +475,8 @@
         <!-- for oss builds -->
         <snakeVersion>1.33</snakeVersion>
         <snakeScope>compile</snakeScope>
-        <shimCompilationVersion>0.3.0-baseline3.2</shimCompilationVersion>
-        <shimRuntimeVersion>0.3.0-baseline3.2</shimRuntimeVersion>
+        <shimCompilationVersion>0.3.0-baseline3.4</shimCompilationVersion>
+        <shimRuntimeVersion>0.3.0-baseline3.4</shimRuntimeVersion>
 
         <framelessCoreCompatVersion></framelessCoreCompatVersion>
         <framelessOrg>org.typelevel</framelessOrg>
