@@ -22,6 +22,73 @@ Key features:
   - with Connect connections, automatically disabling rule Suites that are assignable to DontRunOnPureConnect and running those with ConnectSafe marker traits.
   - will start up local Connect Servers for you in the IDE
 
+## Dependencies
+
+```xml
+<dependency>
+  <groupId>com.sparkutils.</groupId>
+  <artifactId>testing_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+  <version>${testingVersion}</version>
+  <scope>test</scope>
+</dependency>
+```
+
+Current supported runtime versions:
+
+| Spark Version | sparkShortVersion | OSS/Test dbrCompatVersion | Databricks dbrCompatVersion    | scalaCompatVersion   |
+|---------------|-------------------|---------------------------|--------------------------------|----------------------|
+| 3.0           | 3.0               | 3.0.0.oss_                |                                | 2.12                 | 
+| 3.1.3         | 3.1               | 3.1.3.oss_                |                                | 2.12                 | 
+| 3.2           | 3.2               | 3.2.0.oss_                |                                | 2.12                 | 
+| 3.2.1         | 3.2               | 3.2.1.oss_                |                                | 2.12                 | 
+| 3.3.2         | 3.3               | 3.3.2.oss_                |                                | 2.12                 | 
+| 3.3.2         | 3.3               | 3.3.2.oss_                |                                | 2.12                 | 
+| 3.4.1         | 3.4               | 3.4.1.oss_                | 13.3.dbr_                      | 2.12                 | 
+| 3.5.0         | 3.5               | 3.5.0.oss_                | 14.3.dbr_                      | 2.12                 | 
+| 3.5.0         | 3.5               | 3.5.0.oss_                | 15.4.dbr_                      | 2.12                 |
+| 3.5.0         | 3.5               | 3.5.0.oss_                | 16.4.dbr_                      | 2.12                 |
+| 4.0.0         | 4.0               | 4.0.0.oss_                | 17.3.dbr_                      | 2.13                 |
+| 4.1.0         | 4.1               | 4.1.0.oss_                | 18.3.dbr_                      | 2.13                 |
+| 4.2.0         | 4.2               | 4.2.0.oss_                | 18.3.dbr_  (for use on DBR 19) | 2.13                 |
+
+Spark runtimes 3.0,3.1.3, 3.2.0, 3.2.1, 3.3.2 and 3.4.x are deprecated as are DBR's 12.2 and 13.3 and will be removed as the next testing release.
+
+When building on OSS and deploying shaded tests on Databricks the following approach is needed:
+
+```xml
+<dependency>
+  <groupId>com.sparkutils.</groupId>
+  <artifactId>testing_${ossTestCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+  <version>${testingVersion}</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>com.sparkutils</groupId>
+  <artifactId>testing_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+  <version>${testingVersion}</version>
+  <scope>compile</scope>
+</dependency>
+```
+
+### Managing runtime behaviour based on Spark environment
+
+```xml
+<dependency>
+  <groupId>com.sparkutils</groupId>
+  <artifactId>testing-runtime_${dbrCompatVersion}${sparkCompatVersion}_${scalaCompatVersion}</artifactId>
+  <version>${testingVersion}</version>
+</dependency>
+```
+
+The testing-runtime dependency is aimed at libraries and applications that must have version specific behaviour or knowledge
+of the runtime environment or being tested to correctly function.  It is not recommended for most projects, 
+those making use of both Connect and Classic functionality (e.g. SparkSessionExtensions or Expressions) may benefit from
+ConnectWhenForced (as with Quality and dmn-4-spark). 
+
+The library provides a number of Spark version detection functionality and setting of output directories, testing environment etc.  
+It is intended to be a compile time dependency to allow code to react to test cases or Spark environments differently,
+for example the use of ConnectWhenForced.someOrForcedConnect allows code to force Spark Connect style behaviour.
+
 ## Usage
 
 Implement TestRunner for your test classes, it can be an application that simply calls test(args) running all Suite's in your packageName.  Users can pass in arguments to Scalatest but also supply "just=full.qualified.test.suite.name" to start a single test e.g.:
