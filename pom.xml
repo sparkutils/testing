@@ -36,6 +36,30 @@
 
     <profiles>
         <profile>
+            <id>scala_2.12.18</id> <!-- 4 was built against this, seemingly dropped since Sep 23 -->
+            <properties>
+                <scalaVersion>2.12.18</scalaVersion>
+                <scalaCompatVersion>2.12</scalaCompatVersion>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala_2.13.12</id><!-- from jdk 21 / 4 onwards only -->
+            <properties>
+                <scalaVersion>2.13.12</scalaVersion>
+                <scalaCompatVersion>2.13</scalaCompatVersion>
+                <scalatestVersion>3.0.8</scalatestVersion>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala_2.13.18</id><!-- spark4.1  -->
+            <properties>
+                <scalaVersion>2.13.18</scalaVersion>
+                <scalaCompatVersion>2.13</scalaCompatVersion>
+                <scalatestVersion>3.0.9</scalatestVersion>
+            </properties>
+        </profile>
+
+        <profile>
             <id>Spark3</id> 
             <properties>
                 <shimRuntime>3.0.0.oss</shimRuntime>
@@ -186,8 +210,10 @@
                 <shimRuntime>3.5.0.oss</shimRuntime>
                 <shimCompilationRuntime>3.5.0.oss</shimCompilationRuntime>
                 <dbrCompatVersion>3.5.0.oss_</dbrCompatVersion>
+                <!-- provided by scala profile
                 <scalaVersion>2.12.15</scalaVersion>
                 <scalaCompatVersion>2.12</scalaCompatVersion>
+                -->
                 <framelessVersion>0.17.0</framelessVersion>
                 <sparkVersion>3.5.5</sparkVersion>
                 <sparkCompatVersion>3.5</sparkCompatVersion>
@@ -366,8 +392,9 @@
                 <shimRuntime>16.4.dbr</shimRuntime>
                 <shimCompilationRuntime>16.4.dbr</shimCompilationRuntime>
                 <dbrCompatVersion>16.4.dbr_</dbrCompatVersion>
+                <!-- provided by scala version profile
                 <scalaVersion>2.12.15</scalaVersion>
-                <scalaCompatVersion>2.12</scalaCompatVersion>
+                <scalaCompatVersion>2.12</scalaCompatVersion> -->
                 <framelessVersion>0.17.0</framelessVersion>
                 <sparkVersion>3.5.0</sparkVersion>
                 <sparkCompatVersion>3.5</sparkCompatVersion>
