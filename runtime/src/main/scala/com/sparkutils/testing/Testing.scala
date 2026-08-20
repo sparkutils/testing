@@ -58,7 +58,7 @@ object ConnectWhenForced {
    * @return
    */
   def someOrForcedConnect[T](thunk: => T): Option[T] =
-    if (TestUtilsEnvironment.getConfig(FORCED_CONNECT_PROPERTY_NAME, "false").toBoolean)
+    if (TestUtilsEnvironment.getConfig(FORCED_CONNECT_PROPERTY_NAME, "false").toBoolean || !org.apache.spark.sql.ShimUtils.isClassic(SparkSession.active))
       None
     else
       Some(thunk)

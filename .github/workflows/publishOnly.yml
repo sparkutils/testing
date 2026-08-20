@@ -13,7 +13,19 @@ env:
 
 jobs:
 
+  publish_2_12_18_and_13_12:
+    uses: sparkutils/building/.github/workflows/publish_build.yml@main
+    with:
+      theMatrix: |
+        {
+          "profile": ["Spark350", "16.4.dbr"],
+          "scala": [ "scala_2.13.12" ]
+        }
+      jdk: 11
+    secrets: inherit
+
   publish_21:
+    if: false
     uses: sparkutils/building/.github/workflows/publish_build.yml@main
     with:
       theMatrix: |

@@ -49,7 +49,7 @@ trait TestUtils extends SessionStrategy with Serializable with ClassicTestUtils 
     sys.props.put("spark.testing","yes, yes it is")
   }
 
-  lazy val outputDir = SparkTestUtils.ouputDir
+  lazy val outputDir = SparkTestUtils.outputDir
 
   def cleanUp(target: String): Unit = {
     val outdir = new Directory(new java.io.File(target))

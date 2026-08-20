@@ -183,10 +183,9 @@ object SparkTestUtils {
     stringEnvOrProp("SPARKUTILS_TEST_OUTPUTDIR", "./target/testData")
   )
 
-  def ouputDir = tpath.get
+  def outputDir: String = tpath.get
 
-
-  def setPath(newPath: String) = {
+  def setPath(newPath: String): Unit = {
     tpath.set(newPath)
   }
 

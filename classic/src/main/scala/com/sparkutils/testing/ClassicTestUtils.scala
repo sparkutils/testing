@@ -60,9 +60,17 @@ trait ClassicTestUtils extends Serializable {
   /**
    * Only run when the extension is enabled and in classic mode
    */
-  def onlyWithExtension(thunk: => Unit): Unit = if (!inConnect.get()) {
+  def onlyWithQualityExtension(thunk: => Unit): Unit =
+    onlyWithExtension("com.sparkutils.quality.impl.extension.QualitySparkExtension"){
+      thunk
+    }
+
+  /**
+   * Only run when the extension is enabled and in classic mode
+   */
+  def onlyWithExtension(extension: String)(thunk: => Unit): Unit = if (!inConnect.get()) {
     val extensions = sparkSession.sparkContext.getConf.get("spark.sql.extensions","")
-    if (extensions.indexOf("com.sparkutils.quality.impl.extension.QualitySparkExtension") > -1) {
+    if (extensions.indexOf(extension) > -1) {
       thunk
     }
   }
